@@ -1,20 +1,24 @@
 import Meme from "@/models/meme";
-import Message from "@/models/message"; // 👇 Naya Message model import kiya
+import Message from "@/models/message"; 
 import { connectDB } from "@/lib/db";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth"; 
 import LogoutButton from "@/app/admin/logout/LogoutButton"; 
+
+// 👇 Naye imports health widget ke liye
+import StorageHealth from "@/app/components/StorageHealth";
+import { Suspense } from "react";
 
 export default async function Dashboard() {
   
   await requireAdmin();
   await connectDB();
 
-  // 👇 MAGIC: Promise.all use kiya taaki teeno count ek sath load ho, site super fast rahe! 🚀
+  // MAGIC: Promise.all use kiya taaki teeno count ek sath load ho, site super fast rahe! 🚀
   const [pendingCount, publishedCount, unreadMessages] = await Promise.all([
     Meme.countDocuments({ isApproved: false }),
     Meme.countDocuments({ isApproved: true }),
-    Message.countDocuments({ isRead: false }) // 👈 Unread messages ka count
+    Message.countDocuments({ isRead: false }) 
   ]);
 
   return (
@@ -37,7 +41,16 @@ export default async function Dashboard() {
           </h1>
         </div>
 
-        {/* 3. The 4 Action Squares Grid */}
+        {/* 🚀 3. NAYA: CLOUD STORAGE HEALTH WIDGET */}
+        <Suspense fallback={
+          <div className="w-full h-40 bg-white rounded-2xl shadow-sm border border-gray-200 mb-8 animate-pulse flex items-center justify-center">
+            <span className="text-gray-400 font-bold">Loading Server Health...</span>
+          </div>
+        }>
+          <StorageHealth />
+        </Suspense>
+
+        {/* 4. The 4 Action Squares Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           
           <Link href="/upload" className="bg-white hover:bg-purple-50 hover:border-purple-300 border-2 border-transparent transition-all shadow-md hover:shadow-lg rounded-3xl aspect-square flex flex-col items-center justify-center gap-3 group">
@@ -66,12 +79,11 @@ export default async function Dashboard() {
             <span className="font-bold text-lg text-gray-700">Published ({publishedCount})</span>
           </Link>
 
-          {/* 👇 NAYA INBOX SQUARE 👇 */}
+          {/* Inbox Square */}
           <Link href="/admin/messages" className="bg-white hover:bg-blue-50 hover:border-blue-400 border-2 border-transparent transition-all shadow-md hover:shadow-lg rounded-3xl aspect-square flex flex-col items-center justify-center gap-3 group cursor-pointer">
             <div className="bg-blue-100 text-blue-600 p-4 rounded-full group-hover:scale-110 transition-transform relative">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
               
-              {/* Naya Notification Badge jo pulse (blink) karega */}
               {unreadMessages > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full animate-pulse shadow-md">
                   {unreadMessages}
@@ -83,7 +95,7 @@ export default async function Dashboard() {
 
         </div>
 
-        {/* 4. View Site Button */}
+        {/* 5. View Site Button */}
         <div className="flex justify-center mb-16">
           <Link href="/" target="_blank" className="bg-gray-800 hover:bg-purple-600 text-white transition-colors px-10 py-4 rounded-full font-bold shadow-lg flex items-center gap-3 text-lg">
             View Site
