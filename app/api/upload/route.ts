@@ -27,9 +27,9 @@ export async function POST(request: Request) {
     const file = formData.get("file") as File;
 
     // 1. Basic Field Validation
-    if (!file || !title || !category) {
+if (!file || !title || !category || !description) {
       return NextResponse.json(
-        { success: false, error: "Title, Category, and File are required!" }, 
+        { success: false, error: "Title, Category, Description, and File are required!" }, 
         { status: 400 }
       );
     }
