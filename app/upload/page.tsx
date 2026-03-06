@@ -79,7 +79,6 @@ export default function PublicUpload() {
     <div className="min-h-screen bg-[#F4F4F5] flex flex-col items-center justify-center p-4 py-12">
       
       <div className="max-w-xl w-full mb-4">
-        {/* 👇 Back Button Added Here */}
         <button 
           onClick={() => router.back()} 
           className="flex items-center text-sm font-bold text-gray-500 hover:text-black transition-colors"
@@ -110,30 +109,36 @@ export default function PublicUpload() {
             />
           </div>
           
-          {/* Category */}
+          {/* 👇 Category (Ab user khud type karega) 👇 */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Category *</label>
-            <select 
+            <input 
               name="category" 
               required 
-              className="w-full p-4 bg-gray-50 rounded-xl border-2 border-gray-100 focus:border-purple-500 outline-none font-bold text-gray-900 transition-colors"
-            >
-              <option value="">Select a Category</option>
-              <option value="funny">Funny</option>
-              <option value="programming">Programming</option>
-              <option value="dark">Dark Humor</option>
-              <option value="relatable">Relatable</option>
-              <option value="trending">Trending</option>
-            </select>
+              placeholder="e.g., Gaming, Bollywood, Anime, Dank..." 
+              className="w-full p-4 bg-gray-50 rounded-xl border-2 border-gray-100 focus:border-purple-500 outline-none font-bold text-gray-900 placeholder-gray-400 transition-colors" 
+            />
           </div>
 
-          {/* Tags (Optional) */}
+          {/* Tags */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Tags (Optional)</label>
             <input 
               name="tags" 
               placeholder="e.g., coding, cat, sleep" 
               className="w-full p-4 bg-gray-50 rounded-xl border-2 border-gray-100 focus:border-purple-500 outline-none font-bold text-gray-900 placeholder-gray-400 transition-colors" 
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Description *</label>
+            <textarea 
+              name="description" 
+              required 
+              rows={4}
+              placeholder="Write a killer SEO-friendly description for your meme..." 
+              className="w-full p-4 bg-gray-50 rounded-xl border-2 border-gray-100 focus:border-purple-500 outline-none font-bold text-gray-900 placeholder-gray-400 transition-colors resize-none" 
             />
           </div>
 
