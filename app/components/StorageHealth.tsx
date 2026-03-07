@@ -22,7 +22,7 @@ export default async function StorageHealth() {
     error = "Could not fetch storage data.";
   }
 
-  // Agar error aaye toh basic UI dikhao taaki dashboard crash na ho
+  // Agar error aaye toh basic UI dikhao
   if (error || !usageData) {
     return (
       <div className="bg-red-50 border border-red-200 p-6 rounded-2xl shadow-sm w-full mb-8">
@@ -34,13 +34,16 @@ export default async function StorageHealth() {
     );
   }
 
-  // 🛡️ BULLETPROOF LOGIC: Agar 'used_percent' missing hai, toh khud calculate karo
+  // 🛡️ THE FIX: Cloudinary Free Plan usually gives 25GB Limit
+  const FREE_PLAN_LIMIT = 25 * 1024 * 1024 * 1024; // 25 GB in Bytes
+
   const storageUsed = usageData?.storage?.usage || 0;
-  const storageLimit = usageData?.storage?.limit || 1; // 1 to prevent divide by zero
+  // Agar limit missing hai toh 25GB set karo, 1 byte nahi!
+  const storageLimit = usageData?.storage?.limit || FREE_PLAN_LIMIT; 
   const storagePercent = usageData?.storage?.used_percent ?? ((storageUsed / storageLimit) * 100);
 
   const bandwidthUsed = usageData?.bandwidth?.usage || 0;
-  const bandwidthLimit = usageData?.bandwidth?.limit || 1;
+  const bandwidthLimit = usageData?.bandwidth?.limit || FREE_PLAN_LIMIT;
   const bandwidthPercent = usageData?.bandwidth?.used_percent ?? ((bandwidthUsed / bandwidthLimit) * 100);
 
   const totalFiles = usageData?.objects?.usage || 0;
@@ -63,7 +66,7 @@ export default async function StorageHealth() {
           <div className="flex justify-between text-sm font-bold text-gray-600 mb-2">
             <span>💾 Storage Space</span>
             <span className={storagePercent > 80 ? "text-red-500" : "text-gray-900"}>
-              {storagePercent.toFixed(1)}%
+              {storagePercent.toFixed(2)}%
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden">
@@ -82,7 +85,7 @@ export default async function StorageHealth() {
           <div className="flex justify-between text-sm font-bold text-gray-600 mb-2">
             <span>🌐 Bandwidth (Monthly)</span>
             <span className={bandwidthPercent > 80 ? "text-red-500" : "text-gray-900"}>
-              {bandwidthPercent.toFixed(1)}%
+              {bandwidthPercent.toFixed(2)}%
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden">
