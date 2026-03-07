@@ -25,7 +25,7 @@ export default async function StorageHealth() {
   // Agar error aaye toh basic UI dikhao taaki dashboard crash na ho
   if (error || !usageData) {
     return (
-      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl shadow-sm w-full">
+      <div className="bg-red-50 border border-red-200 p-6 rounded-2xl shadow-sm w-full mb-8">
         <h3 className="text-red-600 font-bold flex items-center gap-2">
           <span>⚠️</span> Cloud Storage Health Error
         </h3>
@@ -34,16 +34,16 @@ export default async function StorageHealth() {
     );
   }
 
-  // Cloudinary Data Extraction
-  const storageUsed = usageData.storage.usage;
-  const storageLimit = usageData.storage.limit;
-  const storagePercent = usageData.storage.used_percent;
+  // 🛡️ BULLETPROOF LOGIC: Agar 'used_percent' missing hai, toh khud calculate karo
+  const storageUsed = usageData?.storage?.usage || 0;
+  const storageLimit = usageData?.storage?.limit || 1; // 1 to prevent divide by zero
+  const storagePercent = usageData?.storage?.used_percent ?? ((storageUsed / storageLimit) * 100);
 
-  const bandwidthUsed = usageData.bandwidth.usage;
-  const bandwidthLimit = usageData.bandwidth.limit;
-  const bandwidthPercent = usageData.bandwidth.used_percent;
+  const bandwidthUsed = usageData?.bandwidth?.usage || 0;
+  const bandwidthLimit = usageData?.bandwidth?.limit || 1;
+  const bandwidthPercent = usageData?.bandwidth?.used_percent ?? ((bandwidthUsed / bandwidthLimit) * 100);
 
-  const totalFiles = usageData.objects.usage; // Total images/videos uploaded
+  const totalFiles = usageData?.objects?.usage || 0;
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 w-full mb-8">
@@ -52,7 +52,7 @@ export default async function StorageHealth() {
           <span>☁️</span> Cloud Storage Health
         </h3>
         <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">
-          {usageData.plan} Plan
+          {usageData?.plan || "Free"} Plan
         </span>
       </div>
 
@@ -68,7 +68,7 @@ export default async function StorageHealth() {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden">
             <div 
-              className={`h-2.5 rounded-full ${storagePercent > 80 ? 'bg-red-500' : 'bg-green-500'}`} 
+              className={`h-2.5 rounded-full transition-all duration-500 ${storagePercent > 80 ? 'bg-red-500' : 'bg-green-500'}`} 
               style={{ width: `${Math.min(storagePercent, 100)}%` }}
             ></div>
           </div>
@@ -87,7 +87,7 @@ export default async function StorageHealth() {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden">
             <div 
-              className={`h-2.5 rounded-full ${bandwidthPercent > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 
+              className={`h-2.5 rounded-full transition-all duration-500 ${bandwidthPercent > 80 ? 'bg-red-500' : 'bg-blue-500'}`} 
               style={{ width: `${Math.min(bandwidthPercent, 100)}%` }}
             ></div>
           </div>
