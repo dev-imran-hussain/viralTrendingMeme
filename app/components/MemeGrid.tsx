@@ -37,24 +37,33 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
     setLoading(false);
   };
 
+  // 🚀 MAGIC FUNCTION: Ye function Cloudinary URLs ko compress kar dega
+  const getOptimizedUrl = (url: string) => {
+    if (!url) return "";
+    // Sirf Cloudinary URLs ko compress karo (w_800 matlab 800px width, f_auto matlab WebP format)
+    if (url.includes("/upload/")) {
+      return url.replace("/upload/", "/upload/q_auto,f_auto,w_800/");
+    }
+    return url;
+  };
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {memes.map((meme: any) => (
           <div
             key={meme._id}
-            // 👇 YAHAN CHANGE KIYA: border-2 border-black add kiya
             className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-black group flex flex-col"
           >
             {/* Top Media Area */}
-            {/* 👇 YAHAN CHANGE KIYA: border-b-2 border-black add kiya taaki image aur text separate dikhe */}
             <Link href={`/meme/${meme.slug}`} className="block overflow-hidden relative bg-gray-50 border-b-2 border-black">
               {meme.mediaType === "video" ? (
                 <VideoPlayer src={meme.mediaUrl} />
               ) : (
                 <img
-                  src={meme.mediaUrl}
+                  src={getOptimizedUrl(meme.mediaUrl)} // 👈 OPTIMIZED URL YAHAN LAGAYA
                   alt={meme.title}
+                  loading="lazy" // 👈 LAZY LOADING: Sirf tab load hoga jab user scroll karke neeche aayega
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               )}
@@ -68,7 +77,6 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
                 </p>
               </Link>
 
-              {/* 👇 YAHAN CHANGE KIYA: Get button pe border-2 border-black add kiya */}
               <Link
                 href={`/meme/${meme.slug}`}
                 className="shrink-0 bg-gray-100 hover:bg-purple-600 hover:text-white text-gray-800 px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 group/btn border-2 border-black"
@@ -97,7 +105,6 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
           <button
             onClick={loadMoreMemes}
             disabled={loading}
-            // 👇 Button pe bhi solid border laga diya
             className="px-8 py-3 bg-black text-white border-2 border-black font-bold rounded-full hover:bg-gray-800 transition-colors disabled:opacity-50 shadow-md"
           >
             {loading ? "Loading..." : "Load More Memes"}
