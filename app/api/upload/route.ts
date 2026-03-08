@@ -4,8 +4,8 @@ import Meme from "@/models/meme";
 import cloudinary from "@/lib/cloudinary";
 
 // ⚡ OPTIMIZATION LIMITS
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB limit for images
-const MAX_VIDEO_SIZE = 15 * 1024 * 1024; // 15MB limit for videos
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB limit for images
+const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB limit for videos
 const ALLOWED_MIME_TYPES = [
   "image/jpeg", 
   "image/png", 
@@ -26,8 +26,8 @@ export async function POST(request: Request) {
     const description = (formData.get("description") as string) || "";
     const file = formData.get("file") as File;
 
-    // 1. Basic Field Validation
-if (!file || !title || !category || !description) {
+    // 1. Basic Field Validation (Description is now required)
+    if (!file || !title || !category || !description) {
       return NextResponse.json(
         { success: false, error: "Title, Category, Description, and File are required!" }, 
         { status: 400 }
@@ -57,14 +57,14 @@ if (!file || !title || !category || !description) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 5. ☁️ Optimized Cloudinary Upload
+    // 5. ☁️ Optimized Cloudinary Upload (🔥 BANDWIDTH SAVER ACTIVATED)
     const uploadResponse: any = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         { 
           resource_type: "auto", 
           folder: "memes",
-          quality: "auto:good", // Auto-compress images
-          // fetch_format: "auto" // Auto-convert to WebP for faster loading
+          quality: "auto", // Auto-compress images and videos smartly
+          fetch_format: "auto" // Auto-convert to lightest format (WebP/WebM)
         },
         (error, result) => { 
           if (error) reject(error); 
