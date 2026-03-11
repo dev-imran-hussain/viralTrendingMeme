@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Meme from "@/models/meme";
 import cloudinary from "@/lib/cloudinary";
+// 🚀 1. Import your new IndexNow function
+import { pingIndexNow } from "@/lib/indexNow"; 
 
 // ⚡ OPTIMIZATION LIMITS
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB limit for images
@@ -82,9 +84,19 @@ export async function POST(request: Request) {
       category,
       tags: tags.split(",").map(t => t.trim()).filter(t => t !== ""), // Clean tags
       description: description.trim(),
-      isApproved: false, 
+      isApproved: false, // ⚠️ Users upload as false. Admins should be true.
       uploaderRole: "user" 
     });
+
+    // 🚀 7. INDEX NOW PING (With Safety Guard)
+    // Only ping search engines if the meme goes live immediately!
+    if (meme.isApproved) {
+      // Ping the homepage to tell Google the main feed updated
+      await pingIndexNow("https://viraltrendingmemes.com/");
+      
+      // Ping the specific category page (e.g., video or image)
+      await pingIndexNow(`https://viraltrendingmemes.com/?type=${meme.mediaType}`);
+    }
 
     return NextResponse.json({ 
       success: true, 
