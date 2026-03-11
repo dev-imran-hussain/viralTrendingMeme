@@ -23,13 +23,13 @@ export async function generateMetadata({
   if (q) {
     // Uppercase first letter of search query for better look
     const capQ = q.charAt(0).toUpperCase() + q.slice(1);
-    title = `${capQ} Memes - Top Viral ${capQ} Videos & Pics | ViralTrendingMeme`;
+    title = `${capQ} Memes - Top Viral ${capQ} Videos & Pics | ViralTrendingMemes`;
     description = `Explore the best and funniest ${q} memes. We have a huge collection of viral ${q} videos, dark humor, and relatable pictures.`;
   } else if (type === "video") {
-    title = "Funny Video Memes & Viral Clips - ViralTrendingMeme";
+    title = "Funny Video Memes & Viral Clips - ViralTrendingMemes";
     description = "Watch the funniest viral video memes, TikTok trends, and short comedy clips updated daily.";
   } else if (type === "image") {
-    title = "Dank Photos & Funny Picture Memes - ViralTrendingMeme";
+    title = "Dank Photos & Funny Picture Memes - ViralTrendingMemes";
     description = "Browse our massive gallery of relatable pictures, dank photos, and hilarious image memes.";
   }
 
@@ -41,8 +41,8 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
-      siteName: "ViralTrendingMeme",
-      url: "https://viraltrendingmeme.com", 
+      siteName: "ViralTrendingMemes",
+      url: "https://viraltrendingmemes.com", 
     },
     twitter: {
       card: "summary_large_image",
@@ -50,7 +50,7 @@ export async function generateMetadata({
       description,
     },
     alternates: {
-      canonical: `https://viraltrendingmeme.com${q ? `/?q=${q}` : ''}${type !== 'all' ? `/?type=${type}` : ''}`,
+      canonical: `https://viraltrendingmemes.com${q ? `/?q=${q}` : ''}${type !== 'all' ? `/?type=${type}` : ''}`,
     }
   };
 }
@@ -105,11 +105,11 @@ export default async function Home({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "ViralTrendingMeme",
-    "url": "https://viraltrendingmeme.com",
+    "name": "ViralTrendingMemes",
+    "url": "https://viraltrendingmemes.com",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://viraltrendingmeme.com/?q={search_term_string}",
+      "target": "https://viraltrendingmemes.com/?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   };
@@ -128,7 +128,7 @@ export default async function Home({
           
           {/* 👇 YAHAN LOGO CHANGE KIYA HAI 👇 */}
           <Link href="/" className="text-2xl font-black tracking-tight text-gray-900 hover:text-purple-600 transition-colors">
-            ViralTrending<span className="text-purple-600">Meme</span>
+            ViralTrending<span className="text-purple-600">Memes</span>
           </Link>
 
           <nav className="hidden md:flex gap-8 font-bold text-gray-500">
