@@ -1,10 +1,13 @@
 import { MetadataRoute } from 'next';
+import { connectDB } from '@/lib/db';
+import Meme from '@/models/meme';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ⚠️ IMPORTANT: Replace with your actual Hostinger domain
   const baseUrl = 'https://viraltrendingmemes.com';
 
-  return [
+  // Base routes
+  const routes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -30,4 +33,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
   ];
-}
+
+  try {
+    // Fetch all approved memes
+    await connectDB();
+    const memes = await Meme.find({ isApproved: true }).select('slug updatedAt createdAt').lean() as any[];
+
+    // Add meme routes dynamically
+    const memeRoutes: MetadataRoute.Sitemap = memes.map((meme) => ({
+      url: `${baseUrl}/meme/${meme.slug}`,
+      lastModified: meme.updatedAt || meme.createdAt || new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    }));
+
+    return [...routes, ...memeRoutes];
+  } catch (error) {
+    console.error("Error generating sitemap for memes:", error);
+    return routes; // graceful fallback
+  }
+}

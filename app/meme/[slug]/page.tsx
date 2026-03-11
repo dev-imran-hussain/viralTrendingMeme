@@ -56,8 +56,30 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
       .filter(Boolean);
   }
 
+  // 🚀 SEO MAGIC 3: JSON-LD for Search Engines
+  const jsonLd = meme.mediaType === "video" ? {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": meme.title,
+    "description": meme.description || `Download this hilarious ${meme.category} meme!`,
+    "thumbnailUrl": [meme.mediaUrl],
+    "uploadDate": meme.createdAt || new Date().toISOString(),
+    "contentUrl": meme.mediaUrl
+  } : {
+    "@context": "https://schema.org",
+    "@type": "ImageObject",
+    "name": meme.title,
+    "description": meme.description || `Download this hilarious ${meme.category} meme!`,
+    "contentUrl": meme.mediaUrl,
+    "datePublished": meme.createdAt || new Date().toISOString()
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F4F5] pb-20 relative selection:bg-purple-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       
       {/* 🛑 THE AD POPUP */}
       <InterstitialAd />
