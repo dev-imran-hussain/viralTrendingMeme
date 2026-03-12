@@ -2,17 +2,38 @@ import { connectDB } from "@/lib/db";
 import Message from "@/models/message";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth"; 
+import { revalidatePath } from "next/cache"; // 👈 Naya import refresh ke liye
 
 export default async function AdminMessagesPage() {
   await requireAdmin();
   await connectDB();
 
-  // 👇 YAHAN HAI MAGIC FIX! 👇
   // Jaise hi tu ye page kholega, saare 'Unread' messages database mein 'Read' ho jayenge!
   await Message.updateMany({ isRead: false }, { isRead: true });
 
   // Naye messages pehle dikhane ke liye sort createdAt -1
   const messages = await Message.find({}).sort({ createdAt: -1 }).lean() as any[];
+
+  // 🚀 ACTION 1: SINGLE DELETE
+  async function deleteMessage(formData: FormData) {
+    "use server";
+    await requireAdmin();
+    await connectDB();
+    const id = formData.get("id") as string;
+    if (id) {
+      await Message.findByIdAndDelete(id);
+      revalidatePath("/admin/messages");
+    }
+  }
+
+  // 🚀 ACTION 2: DELETE ALL MESSAGES
+  async function deleteAllMessages() {
+    "use server";
+    await requireAdmin();
+    await connectDB();
+    await Message.deleteMany({}); // Saare messages ek sath swaha!
+    revalidatePath("/admin/messages");
+  }
 
   // Topic ke hisaab se color tag
   const getTopicStyle = (topic: string) => {
@@ -40,6 +61,20 @@ export default async function AdminMessagesPage() {
 
       <main className="max-w-5xl mx-auto px-6 mt-10">
         
+        {/* 👇 NAYA: DELETE ALL BUTTON (Sirf tab dikhega jab messages honge) 👇 */}
+        {messages.length > 0 && (
+          <div className="flex justify-end mb-6">
+            <form action={deleteAllMessages}>
+              <button 
+                type="submit" 
+                className="px-6 py-3 bg-red-500 text-white font-black rounded-xl text-sm border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+              >
+                Delete All Messages 🗑️
+              </button>
+            </form>
+          </div>
+        )}
+
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] mt-6">
             <div className="text-6xl mb-4">📭</div>
@@ -70,10 +105,20 @@ export default async function AdminMessagesPage() {
                     {new Date(msg.createdAt).toLocaleDateString()}
                   </span>
                   
-                  {/* Reply via email direct button */}
-                  <a href={`mailto:${msg.email}?subject=Re: Your message to ViralTrendingMeme`} className="px-5 py-2 bg-black text-white font-bold rounded-xl text-sm border-2 border-black hover:bg-white hover:text-black transition-colors">
-                    Reply ✉️
-                  </a>
+                  {/* 👇 NAYA: REPLY AND SINGLE DELETE BUTTONS 👇 */}
+                  <div className="flex gap-2">
+                    <a href={`mailto:${msg.email}?subject=Re: Your message to ViralTrendingMeme`} className="px-5 py-2 bg-black text-white font-bold rounded-xl text-sm border-2 border-black hover:bg-white hover:text-black transition-colors">
+                      Reply ✉️
+                    </a>
+                    
+                    <form action={deleteMessage}>
+                      <input type="hidden" name="id" value={msg._id.toString()} />
+                      <button type="submit" className="px-4 py-2 bg-red-100 text-red-600 font-bold rounded-xl text-sm border-2 border-red-300 hover:bg-red-600 hover:text-white hover:border-black transition-colors">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+
                 </div>
 
               </div>
