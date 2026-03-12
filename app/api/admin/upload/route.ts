@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Meme from "@/models/meme";
 import cloudinary from "@/lib/cloudinary";
-// 🚀 1. Import your new IndexNow function
 import { pingIndexNow } from "@/lib/indexNow"; 
+// 👇 1. Naye Imports Security/Auth ke liye
+import { verifyToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 
-// ⚡ OPTIMIZATION LIMITS
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB limit for images
-const MAX_VIDEO_SIZE = 30 * 1024 * 1024; // 30MB limit for videos
+// ⚡ OPTIMIZATION LIMITS (UPGRADED!)
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB limit for images
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB limit for videos
 const ALLOWED_MIME_TYPES = [
   "image/jpeg", 
   "image/png", 
@@ -19,6 +21,18 @@ const ALLOWED_MIME_TYPES = [
 
 export async function POST(request: Request) {
   try {
+    // 🔒 2. THE ULTIMATE SECURITY CHECK (Admin Only API)
+    const cookieStore = await cookies();
+    const token = cookieStore.get("adminToken")?.value;
+    
+    // Agar token nahi hai ya galat hai, seedha bahar nikal do
+    if (!token || !verifyToken(token)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized access! Only Admins can upload." }, 
+        { status: 401 }
+      );
+    }
+
     await connectDB();
 
     const formData = await request.formData();
@@ -28,7 +42,7 @@ export async function POST(request: Request) {
     const description = (formData.get("description") as string) || "";
     const file = formData.get("file") as File;
 
-    // 1. Basic Field Validation (Description is now required)
+    // Basic Field Validation
     if (!file || !title || !category || !description) {
       return NextResponse.json(
         { success: false, error: "Title, Category, Description, and File are required!" }, 
@@ -36,7 +50,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 🛡️ 2. SECURITY CHECK: File Type Validation (MIME Type)
+    // File Type Validation (MIME Type)
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
       return NextResponse.json(
         { success: false, error: "Invalid format! Only JPG, PNG, GIF, WEBP, MP4, and WEBM are allowed." }, 
@@ -44,29 +58,29 @@ export async function POST(request: Request) {
       );
     }
 
-    // 🛡️ 3. SECURITY CHECK: File Size Validation
+    // 🛡️ 3. SECURITY CHECK: File Size Validation (Fixed Error Message)
     const isVideo = file.type.startsWith("video/");
     const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
 
     if (file.size > maxSize) {
       return NextResponse.json(
-        { success: false, error: `File too large! Max size for ${isVideo ? 'video is 15MB' : 'image is 5MB'}.` }, 
+        { success: false, error: `File too large! Max size for ${isVideo ? 'video is 50MB' : 'image is 20MB'}.` }, 
         { status: 400 }
       );
     }
 
-    // 4. File to Buffer (Safe now because size is checked)
+    // File to Buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 5. ☁️ Optimized Cloudinary Upload (🔥 BANDWIDTH SAVER ACTIVATED)
+    // ☁️ Optimized Cloudinary Upload
     const uploadResponse: any = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         { 
           resource_type: "auto", 
           folder: "memes",
-          quality: "auto", // Auto-compress images and videos smartly
-          fetch_format: "auto" // Auto-convert to lightest format (WebP/WebM)
+          quality: "auto", 
+          fetch_format: "auto" 
         },
         (error, result) => { 
           if (error) reject(error); 
@@ -75,36 +89,32 @@ export async function POST(request: Request) {
       ).end(buffer);
     });
 
-    // 6. 📝 Save to Database (Pending State)
+    // 📝 Save to Database (Pending State)
     const meme = await Meme.create({
-      title: title.trim(), // Remove extra spaces
+      title: title.trim(),
       slug: title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now(),
       mediaUrl: uploadResponse.secure_url,
       mediaType: uploadResponse.resource_type === "video" ? "video" : "image",
       category,
-      tags: tags.split(",").map(t => t.trim()).filter(t => t !== ""), // Clean tags
+      tags: tags.split(",").map(t => t.trim()).filter(t => t !== ""), 
       description: description.trim(),
-      isApproved: false, // ⚠️ Users upload as false. Admins should be true.
-      uploaderRole: "user" 
+      isApproved: false, // ⚠️ Goes to Review Queue
+      uploaderRole: "admin" // 👈 Changed to admin
     });
 
-    // 🚀 7. INDEX NOW PING (With Safety Guard)
-    // Only ping search engines if the meme goes live immediately!
+    // 🚀 INDEX NOW PING
     if (meme.isApproved) {
-      // Ping the homepage to tell Google the main feed updated
       await pingIndexNow("https://viraltrendingmemes.com/");
-      
-      // Ping the specific category page (e.g., video or image)
       await pingIndexNow(`https://viraltrendingmemes.com/?type=${meme.mediaType}`);
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: "Meme submitted successfully! Waiting for admin approval." 
+      message: "Meme submitted successfully! Saved to Review Queue." 
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error("Public Upload Error:", error);
+    console.error("Admin Upload Error:", error);
     return NextResponse.json(
       { success: false, error: "Upload failed. Please try again later." }, 
       { status: 500 }

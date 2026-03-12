@@ -53,7 +53,7 @@ export default async function Dashboard() {
         {/* 4. The 4 Action Squares Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           
-          <Link href="/upload" className="bg-white hover:bg-purple-50 hover:border-purple-300 border-2 border-transparent transition-all shadow-md hover:shadow-lg rounded-3xl aspect-square flex flex-col items-center justify-center gap-3 group">
+          <Link href="/admin/upload" className="bg-white hover:bg-purple-50 hover:border-purple-300 border-2 border-transparent transition-all shadow-md hover:shadow-lg rounded-3xl aspect-square flex flex-col items-center justify-center gap-3 group">
             <div className="bg-purple-100 text-purple-600 p-4 rounded-full group-hover:scale-110 transition-transform">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"></path></svg>
             </div>

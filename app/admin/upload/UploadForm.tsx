@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function PublicUpload() {
+export default function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,8 @@ export default function PublicUpload() {
     const formData = new FormData(e.target);
 
     try {
-      const res = await fetch("/api/upload", { 
+      // API call admin wale route par hi jayegi
+      const res = await fetch("/api/admin/upload", { 
         method: "POST", 
         body: formData 
       });
@@ -34,7 +35,7 @@ export default function PublicUpload() {
     }
   };
 
-  // SUCCESS SCREEN
+  // SUCCESS SCREEN (Smooth & Premium)
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F4F4F5] p-6">
@@ -44,9 +45,9 @@ export default function PublicUpload() {
             <span className="text-4xl">✅</span>
           </div>
 
-          <h2 className="text-2xl font-black text-gray-900 mb-2">Meme Submitted!</h2>
+          <h2 className="text-2xl font-black text-gray-900 mb-2">Saved to Queue!</h2>
           <p className="text-gray-500 mb-8 font-medium text-sm">
-            Thanks for sharing! Admin tumhare meme ko review karega. Approve hote hi ye live ho jayega. 🔥
+            Meme successfully upload ho gaya hai. Ab Approve page par jaakar ise Live karo! 🔥
           </p>
 
           <div className="space-y-4">
@@ -62,10 +63,10 @@ export default function PublicUpload() {
             </button>
 
             <button 
-              onClick={() => router.push("/")} 
+              onClick={() => router.push("/admin/approve")} 
               className="w-full py-4 bg-white text-gray-800 border-2 border-gray-200 rounded-xl font-bold hover:border-black hover:bg-gray-50 transition-all flex justify-center items-center gap-2"
             >
-              🏠 Back to Home
+              👀 Go to Review Queue
             </button>
           </div>
 
@@ -74,7 +75,7 @@ export default function PublicUpload() {
     );
   }
 
-  // UPLOAD FORM
+  // UPLOAD FORM (Smooth & Premium)
   return (
     <div className="min-h-screen bg-[#F4F4F5] flex flex-col items-center justify-center p-4 py-12">
       
@@ -87,11 +88,11 @@ export default function PublicUpload() {
         </button>
       </div>
 
-      <div className="max-w-xl w-full bg-white rounded-3xl shadow-xl overflow-hidden">
+      <div className="max-w-xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
         
         {/* Header */}
         <div className="bg-black p-6 text-center border-b-4 border-purple-500">
-          <h1 className="text-2xl font-black text-white tracking-wide">UPLOAD A MEME</h1>
+          <h1 className="text-2xl font-black text-white tracking-wide">ADMIN UPLOAD</h1>
           <p className="text-purple-300 text-sm mt-1">Make the internet laugh today! 😂</p>
         </div>
 
@@ -109,7 +110,7 @@ export default function PublicUpload() {
             />
           </div>
           
-          {/* 👇 Category (Ab user khud type karega) 👇 */}
+          {/* Category */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Category *</label>
             <input 
@@ -166,7 +167,7 @@ export default function PublicUpload() {
                   {file?.type.startsWith("video") ? (
                     <span className="text-5xl">🎥</span>
                   ) : (
-                    <img src={preview} alt="Preview" className="max-h-48 rounded-lg object-contain shadow-sm" />
+                    <img src={preview} alt="Preview" className="max-h-48 rounded-lg object-contain shadow-sm border border-gray-200" />
                   )}
                   <p className="text-sm mt-3 font-bold text-purple-600 truncate max-w-xs">{file?.name}</p>
                 </div>
@@ -188,7 +189,7 @@ export default function PublicUpload() {
             {loading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Uploading...
+                Uploading to Queue...
               </>
             ) : "Submit Meme"}
           </button>
