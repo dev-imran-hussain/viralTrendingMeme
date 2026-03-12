@@ -91,7 +91,7 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
             <span className="text-lg leading-none">←</span> Back
           </Link>
           <Link href="/" className="text-xl font-black tracking-tight text-gray-900">
-            Meme<span className="text-purple-600">Site</span>
+            ViralTrending<span className="text-purple-600">Memes</span>
           </Link>
         </div>
       </header>
