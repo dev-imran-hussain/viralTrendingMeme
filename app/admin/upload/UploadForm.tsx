@@ -12,11 +12,45 @@ export default function UploadForm() {
   const handleUpload = async (e: any) => {
     e.preventDefault();
     setLoading(true);
-    
-    const formData = new FormData(e.target);
 
     try {
-      // API call admin wale route par hi jayegi
+      const formElement = e.target;
+      const formData = new FormData(formElement);
+      const rawFile = formData.get("file") as File;
+      
+      // Step 1: Request a secure Cloudinary signature from our Vercel backend
+      const signRes = await fetch("/api/admin/cloudinary-sign", { method: "POST" });
+      const signData = await signRes.json();
+      
+      if (!signData.success) {
+        throw new Error(signData.error || "Failed to get upload signature");
+      }
+
+      // Step 2: Push the heavy video file DIRECTLY to Cloudinary from the user's browser
+      // This completely sneaks past Vercel's strict 4.5MB Serverless Function payload limit
+      const cloudinaryFormData = new FormData();
+      cloudinaryFormData.append("file", rawFile);
+      cloudinaryFormData.append("api_key", signData.apiKey);
+      cloudinaryFormData.append("timestamp", signData.timestamp);
+      cloudinaryFormData.append("signature", signData.signature);
+      cloudinaryFormData.append("folder", "memes");
+
+      const clRes = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloudName}/auto/upload`, {
+        method: "POST",
+        body: cloudinaryFormData
+      });
+      const clData = await clRes.json();
+
+      if (!clData.secure_url) {
+        throw new Error("Cloudinary rejected direct upload: " + JSON.stringify(clData));
+      }
+
+      // Step 3: Now that the file is safely in the cloud, send the URL to our Vercel app
+      // We overwrite the bulky "file" with tiny text strings
+      formData.delete("file");
+      formData.append("mediaUrl", clData.secure_url);
+      formData.append("mediaType", clData.resource_type === "video" ? "video" : "image");
+
       const res = await fetch("/api/admin/upload", { 
         method: "POST", 
         body: formData 
@@ -28,8 +62,8 @@ export default function UploadForm() {
       } else {
         alert(data.error);
       }
-    } catch (err) {
-      alert("Something went wrong! Check your internet.");
+    } catch (err: any) {
+      alert(err.message || "Something went wrong! Size limit or internet error.");
     } finally {
       setLoading(false);
     }
