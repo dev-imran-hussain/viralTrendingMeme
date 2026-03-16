@@ -118,7 +118,7 @@ export async function POST(request: Request) {
       category,
       tags: tags.split(",").map(t => t.trim()).filter(t => t !== ""),
       description: description.trim(),
-      isApproved: true, // ⚠️ Goes to Review Queue
+      isApproved: true, // ⚠️ Goes to published
       uploaderRole: "admin" // 👈 Changed to admin
     });
 
