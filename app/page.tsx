@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { connectDB } from "@/lib/db";
 import Link from "next/link";
+import Script from "next/script";
 import { getMemes } from "@/app/actions/getMemes";
 import MemeGrid from "@/app/components/MemeGrid";
 import { Metadata } from "next";
@@ -147,8 +148,12 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-[#F4F4F5] text-gray-900 selection:bg-purple-300 selection:text-white pb-10 overflow-x-hidden">
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8865004522012498"
-        crossOrigin="anonymous" strategy="afterInteractive"></script>
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8865004522012498"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
