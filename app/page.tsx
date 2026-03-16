@@ -147,6 +147,8 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-[#F4F4F5] text-gray-900 selection:bg-purple-300 selection:text-white pb-10 overflow-x-hidden">
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8865004522012498"
+        crossOrigin="anonymous" strategy="afterInteractive"></script>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -168,11 +170,9 @@ export default async function Home({
               Trending
             </Link>
             <Link href="/" className="hover:text-black transition-colors">
-              Fresh
-            </Link>
-            <Link href="/" className="hover:text-black transition-colors">
               Categories
             </Link>
+            <Link href="/about" className="hover:text-black transition-colors">About</Link>
           </nav>
         </div>
       </header>
@@ -232,8 +232,8 @@ export default async function Home({
           <Link
             href={`/?type=all${q ? `&q=${q}` : ""}`}
             className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${type === "all"
-                ? "bg-black text-white shadow-md scale-100"
-                : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
+              ? "bg-black text-white shadow-md scale-100"
+              : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
               }`}
           >
             🔥 All
@@ -241,8 +241,8 @@ export default async function Home({
           <Link
             href={`/?type=video${q ? `&q=${q}` : ""}`}
             className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${type === "video"
-                ? "bg-black text-white shadow-md scale-100"
-                : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
+              ? "bg-black text-white shadow-md scale-100"
+              : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
               }`}
           >
             🎥 Videos
@@ -250,8 +250,8 @@ export default async function Home({
           <Link
             href={`/?type=image${q ? `&q=${q}` : ""}`}
             className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${type === "image"
-                ? "bg-black text-white shadow-md scale-100"
-                : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
+              ? "bg-black text-white shadow-md scale-100"
+              : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
               }`}
           >
             📸 Photos
@@ -279,6 +279,9 @@ export default async function Home({
           © {new Date().getFullYear()} ViralTrendingMeme. All rights reserved.
         </p>
         <div className="flex gap-6 font-bold text-sm text-gray-500">
+          <Link href="/privacy" className="hover:text-black transition-colors">
+            Privacy Policy
+          </Link>
           <Link href="/about" className="hover:text-black transition-colors">
             About Us
           </Link>
