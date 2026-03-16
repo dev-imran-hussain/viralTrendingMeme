@@ -24,6 +24,7 @@ const MemeSchema = new Schema(
       type: String,
       enum: ["image", "video"],
       required: true,
+      index: true,
     },
 
     thumbnailUrl: {
@@ -52,10 +53,13 @@ const MemeSchema = new Schema(
       default: 0,
       index: true,
     },
+
     isApproved: {
-    type: Boolean,
-    default: false, // Default false matlab public upload turant live nahi hoga
-  },
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
     description: {
       type: String,
       default: "",
@@ -71,6 +75,18 @@ const MemeSchema = new Schema(
     },
   },
   { timestamps: true },
+);
+
+// Compound index for the most common query pattern: approved memes sorted by date
+MemeSchema.index({ isApproved: 1, createdAt: -1 });
+
+// Compound index for approved memes filtered by mediaType
+MemeSchema.index({ isApproved: 1, mediaType: 1, createdAt: -1 });
+
+// Text index for search — replaces expensive $regex full-collection scans
+MemeSchema.index(
+  { title: "text", category: "text", tags: "text", description: "text" },
+  { weights: { title: 10, tags: 5, category: 3, description: 1 }, name: "search_index" }
 );
 
 const Meme = models.Meme || mongoose.model("Meme", MemeSchema);

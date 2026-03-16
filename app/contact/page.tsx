@@ -5,35 +5,50 @@ import Link from "next/link";
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // 1. Form ka data nikalna
+    setError("");
+
+    const form = e.currentTarget;
     const formData = {
-      name: e.target[0].value,
-      email: e.target[1].value,
-      topic: e.target[2].value,
-      message: e.target[3].value,
+      name: (form.elements.namedItem("name") as HTMLInputElement).value.trim(),
+      email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
+      topic: (form.elements.namedItem("topic") as HTMLSelectElement).value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
     };
 
+    // Client-side validation
+    if (formData.name.length < 2) {
+      setError("Name must be at least 2 characters.");
+      setIsSubmitting(false);
+      return;
+    }
+    if (formData.message.length < 10) {
+      setError("Message must be at least 10 characters.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // 2. Apni nayi API ko data bhejna
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
+
+      const data = await res.json();
 
       if (res.ok) {
         setSubmitted(true);
-        e.target.reset(); // Form clear karna
+        form.reset();
       } else {
-        alert("Something went wrong. Please try again.");
+        setError(data.error || "Something went wrong. Please try again.");
       }
-    } catch (error) {
-      alert("Network error.");
+    } catch {
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -79,21 +94,28 @@ export default function ContactPage() {
         ) : (
           <div className="bg-white p-8 md:p-10 rounded-4xl shadow-sm border-2 border-black">
             <form onSubmit={handleSubmit} className="space-y-6">
+
+              {/* Error message */}
+              {error && (
+                <div className="bg-red-50 text-red-600 border border-red-200 rounded-xl p-4 text-sm font-bold">
+                  {error}
+                </div>
+              )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-2">Your Name</label>
-                  <input required type="text" placeholder="John Doe" className="w-full p-4 border-2 border-black rounded-xl bg-[#F8F9FA] focus:bg-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all font-medium" />
+                  <label htmlFor="name" className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-2">Your Name</label>
+                  <input id="name" name="name" required type="text" minLength={2} maxLength={100} placeholder="John Doe" className="w-full p-4 border-2 border-black rounded-xl bg-[#F8F9FA] focus:bg-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all font-medium" />
                 </div>
                 <div>
-                  <label className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-2">Email Address</label>
-                  <input required type="email" placeholder="john@example.com" className="w-full p-4 border-2 border-black rounded-xl bg-[#F8F9FA] focus:bg-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all font-medium" />
+                  <label htmlFor="email" className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-2">Email Address</label>
+                  <input id="email" name="email" required type="email" maxLength={254} placeholder="john@example.com" className="w-full p-4 border-2 border-black rounded-xl bg-[#F8F9FA] focus:bg-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all font-medium" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-2">What is this regarding?</label>
-                <select className="w-full p-4 border-2 border-black rounded-xl bg-[#F8F9FA] focus:bg-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all font-medium appearance-none cursor-pointer">
+                <label htmlFor="topic" className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-2">What is this regarding?</label>
+                <select id="topic" name="topic" className="w-full p-4 border-2 border-black rounded-xl bg-[#F8F9FA] focus:bg-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all font-medium appearance-none cursor-pointer">
                   <option value="feedback">💡 General Feedback</option>
                   <option value="bug">🐛 Report a Bug</option>
                   <option value="content">🗑️ Content Removal Request</option>
@@ -102,8 +124,8 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-2">Your Message</label>
-                <textarea required rows={5} placeholder="Type your message here..." className="w-full p-4 border-2 border-black rounded-xl bg-[#F8F9FA] focus:bg-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all font-medium resize-none" />
+                <label htmlFor="message" className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-2">Your Message</label>
+                <textarea id="message" name="message" required rows={5} minLength={10} maxLength={2000} placeholder="Type your message here..." className="w-full p-4 border-2 border-black rounded-xl bg-[#F8F9FA] focus:bg-white focus:ring-4 focus:ring-purple-500/20 outline-none transition-all font-medium resize-none" />
               </div>
 
               <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-black text-white font-black text-lg rounded-xl hover:bg-purple-600 transition-all border-2 border-black flex justify-center items-center gap-2 disabled:opacity-70 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">

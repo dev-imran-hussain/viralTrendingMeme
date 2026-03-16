@@ -2,36 +2,48 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+// Validate JWT_SECRET exists at module load time
+// This prevents cryptic runtime crashes if the env var is missing
+const JWT_SECRET = process.env.JWT_SECRET;
 
-// 1. Token Verify karne ke liye (Sabhi APIs mein use hoga)
+if (!JWT_SECRET && process.env.NODE_ENV !== "production") {
+  console.warn(
+    "⚠️ JWT_SECRET is not set in environment variables. Admin authentication will fail."
+  );
+}
+
+function getSecret(): string {
+  if (!JWT_SECRET) {
+    throw new Error(
+      "JWT_SECRET is not defined. Please set it in your .env.local file."
+    );
+  }
+  return JWT_SECRET;
+}
+
+// Verify a JWT token and return the decoded payload, or null if invalid
 export function verifyToken(token: string) {
   try {
-    // JWT_SECRET ko confirm karta hai aur token decode karta hai
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, getSecret());
   } catch (error) {
-    // Agar token expire ya galat ho toh null return karega
     return null;
   }
 }
 
-// 2. Pages ko protect karne ke liye (Server Components mein use hoga)
+// Server Component guard — redirects to login if not authenticated
 export async function requireAdmin() {
   const cookieStore = await cookies();
   const token = cookieStore.get("adminToken")?.value;
 
-  // Agar cookie mein token nahi hai, seedha login page par redirect
   if (!token) {
     redirect("/admin/login");
   }
 
   const decoded = verifyToken(token);
-  
-  // Agar token verify nahi hua (Invalid/Expired), toh bhi login par bhej do
+
   if (!decoded) {
     redirect("/admin/login");
   }
 
-  // Sab sahi hone par decoded data return karega
   return decoded;
 }

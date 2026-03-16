@@ -1,7 +1,5 @@
 import { Suspense } from "react";
-import { connectDB } from "@/lib/db";
 import Link from "next/link";
-import Script from "next/script";
 import { getMemes } from "@/app/actions/getMemes";
 import MemeGrid from "@/app/components/MemeGrid";
 import { Metadata } from "next";
@@ -70,7 +68,13 @@ export async function generateMetadata({
       images: ["https://viraltrendingmemes.com/og-image.jpg"],
     },
     alternates: {
-      canonical: `https://viraltrendingmemes.com${q ? `/?q=${q}` : ""}${type !== "all" ? `/?type=${type}` : ""}`,
+      canonical: (() => {
+        const params = new URLSearchParams();
+        if (q) params.set("q", q);
+        if (type !== "all") params.set("type", type);
+        const qs = params.toString();
+        return `https://viraltrendingmemes.com${qs ? `/?${qs}` : ""}`;
+      })(),
     },
   };
 }
@@ -127,7 +131,7 @@ export default async function Home({
 }: {
   searchParams: Promise<{ type?: string; q?: string }>;
 }) {
-  await connectDB();
+  // connectDB() is already called inside getMemes() — no need to call it here
 
   const params = await searchParams;
   const type = params?.type || "all";
@@ -148,12 +152,7 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-[#F4F4F5] text-gray-900 selection:bg-purple-300 selection:text-white pb-10 overflow-x-hidden">
-      <Script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8865004522012498"
-        crossOrigin="anonymous"
-        strategy="afterInteractive"
-      />
+      {/* AdSense script is loaded globally in layout.tsx — no duplicate needed here */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -264,10 +263,18 @@ export default async function Home({
         </div>
       </section>
 
-      {/* 5. Sleek Horizontal Ad Banner */}
+      {/* 5. Ad Banner — Real AdSense responsive ad unit */}
       <div className="max-w-7xl mx-auto px-6 mb-12">
-        <div className="w-full h-24 bg-white/50 backdrop-blur-sm rounded-2xl flex items-center justify-center text-gray-400 font-black text-xs border-2 border-dashed border-gray-200 uppercase tracking-[0.2em] transition-colors hover:border-gray-300">
-          Sponsored Ad Space
+        <div className="w-full bg-white/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-100">
+          {/* TODO: After AdSense approval, create a "Display Ad" unit in your
+               AdSense dashboard and replace data-ad-slot with the real slot ID */}
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-8865004522012498"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
       </div>
 
@@ -283,15 +290,21 @@ export default async function Home({
         <p className="text-gray-500 font-bold text-sm">
           © {new Date().getFullYear()} ViralTrendingMeme. All rights reserved.
         </p>
-        <div className="flex gap-6 font-bold text-sm text-gray-500">
+        <div className="flex flex-wrap justify-center gap-6 font-bold text-sm text-gray-500">
           <Link href="/privacy" className="hover:text-black transition-colors">
             Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-black transition-colors">
+            Terms of Service
+          </Link>
+          <Link href="/dmca" className="hover:text-black transition-colors">
+            DMCA
           </Link>
           <Link href="/about" className="hover:text-black transition-colors">
             About Us
           </Link>
           <Link href="/contact" className="hover:text-black transition-colors">
-            Contact & Feedback
+            Contact
           </Link>
         </div>
       </footer>

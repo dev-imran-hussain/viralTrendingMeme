@@ -57,22 +57,23 @@ export async function GET(request: Request) {
       query.mediaType = type;
     }
 
-    // 3. OPTIMIZED FETCH
+    // 3. OPTIMIZED FETCH — fetch one extra to check if there's a next page
     const memes = await Meme.find(query)
-      .sort({ createdAt: -1 }) // Naye memes pehle
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limitParams)
-      .limit(limitParams)
-      .select("title mediaUrl mediaType category slug description tags"); // ⚡ Faltu data (fileSize, etc.) nahi bhej rahe
+      .limit(limitParams + 1)
+      .select("title mediaUrl mediaType category slug description tags")
+      .lean();
 
-    // Total count pagination ke liye
-    const total = await Meme.countDocuments(query);
+    // If we got more than limitParams, there are more pages
+    const hasMore = memes.length > limitParams;
+    const results = hasMore ? memes.slice(0, limitParams) : memes;
 
     return NextResponse.json({
       success: true,
-      memes,
+      memes: results,
       currentPage: page,
-      totalPages: Math.ceil(total / limitParams),
-      totalMemes: total,
+      hasMore,
     }, { status: 200 });
 
   } catch (error) {

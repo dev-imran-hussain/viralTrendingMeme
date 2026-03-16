@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import CookieConsent from "@/app/components/CookieConsent";
 
-// 👇 1. Vercel ke tools import kiye
+// Vercel Analytics & Speed Insights
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -17,7 +18,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// 👇 2. Default hatakar tera asli Brand Name aur SEO description daal diya!
+// SEO: Explicit viewport for mobile rendering
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#7c3aed",
+};
+
 export const metadata: Metadata = {
   title: "ViralTrendingMeme - Unlimited Laughs & Daily Memes",
   description: "The internet's best collection of funny videos, dank photos, dark humor, and viral trends. Updated every single day.",
@@ -35,11 +42,14 @@ export default function RootLayout({
       >
         {children}
 
-        {/* 👇 3. Analytics aur Speed Insights yahan add kar diye */}
+        {/* Cookie Consent Banner — GDPR/CCPA compliant */}
+        <CookieConsent />
+
+        {/* Analytics & Speed Insights */}
         <Analytics />
         <SpeedInsights />
 
-        {/* ✅ Google AdSense - using Next.js Script component for correct typing & strategy support */}
+        {/* Google AdSense */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8865004522012498"

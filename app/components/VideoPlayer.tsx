@@ -1,9 +1,9 @@
 "use client";
 import { useRef, useState } from "react";
 
-export default function VideoPlayer({ src, poster }: { src: string; poster?: string }) {
+export default function VideoPlayer({ src, poster, alt }: { src: string; poster?: string; alt?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true); // True initially if autoPlay is on
+  const [isPlaying, setIsPlaying] = useState(false); // Default paused until user clicks
 
   const togglePlay = (e: React.MouseEvent) => {
     e.preventDefault(); 
@@ -11,7 +11,7 @@ export default function VideoPlayer({ src, poster }: { src: string; poster?: str
 
     if (videoRef.current) {
       if (videoRef.current.paused) {
-        // 🔥 NEW LOGIC: Pause all other videos before playing this one
+        // Pause all other videos before playing this one
         const allVideos = document.querySelectorAll("video");
         allVideos.forEach((vid) => {
           if (vid !== videoRef.current) {
@@ -19,7 +19,6 @@ export default function VideoPlayer({ src, poster }: { src: string; poster?: str
           }
         });
 
-        // Now play the video the user actually clicked
         videoRef.current.play();
         setIsPlaying(true);
       } else {
@@ -33,18 +32,20 @@ export default function VideoPlayer({ src, poster }: { src: string; poster?: str
     <div 
       className="relative w-full h-full cursor-pointer group"
       onClick={togglePlay}
+      role="button"
+      aria-label={alt ? `Play video: ${alt}` : "Play video"}
     >
       <video
         ref={videoRef}
         src={src}
         poster={poster}
+        title={alt || "Meme video"}
         loop
         playsInline
         preload="metadata"
         className="w-full h-64 object-cover"
         controlsList="nodownload noremoteplayback"
         disablePictureInPicture
-        // Keeps the Play button overlay in sync automatically!
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)} 
       />

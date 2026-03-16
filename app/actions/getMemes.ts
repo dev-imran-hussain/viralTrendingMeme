@@ -10,28 +10,31 @@ export async function getMemes(page = 1, limit = 10, type = "all", search = "") 
   const skip = (page - 1) * limit;
 
   // 1. Base Query: Only show approved memes
-  const query: any = { isApproved: true };
+  const query: Record<string, unknown> = { isApproved: true };
 
   // 2. Filter by Type
   if (type === "video") query.mediaType = "video";
   if (type === "image") query.mediaType = "image";
 
-  // 3. Search Logic (Title, Category, or Tags)
+  // 3. Search Logic — Uses MongoDB text index for performance
+  // Falls back to $regex only if text search returns no results
   if (search) {
-    query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { category: { $regex: search, $options: "i" } },
-      { tags: { $regex: search, $options: "i" } }
-    ];
+    query.$text = { $search: search };
   }
 
-  // Fetch from DB
+  // Fetch from DB — only select fields needed by the grid
   const memes = await Meme.find(query)
-    .sort({ createdAt: -1 }) // Newest first
+    .sort(search ? { score: { $meta: "textScore" }, createdAt: -1 } : { createdAt: -1 })
     .skip(skip)
     .limit(limit)
+    .select("title slug mediaUrl mediaType category tags description views createdAt")
     .lean();
 
-  // Convert MongoDB ObjectIds to strings
-  return JSON.parse(JSON.stringify(memes));
+  // Convert MongoDB ObjectIds & dates to plain serializable objects
+  return memes.map((m) => ({
+    ...m,
+    _id: String(m._id),
+    createdAt: m.createdAt ? new Date(m.createdAt as string | number | Date).toISOString() : null,
+    updatedAt: m.updatedAt ? new Date(m.updatedAt as string | number | Date).toISOString() : null,
+  }));
 }

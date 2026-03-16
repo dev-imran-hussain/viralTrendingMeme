@@ -122,10 +122,10 @@ export async function POST(request: Request) {
       uploaderRole: "admin" // 👈 Changed to admin
     });
 
-    // 🚀 INDEX NOW PING
+    // 🚀 INDEX NOW PING — notify search engines about the new meme page
     if (meme.isApproved) {
+      await pingIndexNow(`https://viraltrendingmemes.com/meme/${meme.slug}`);
       await pingIndexNow("https://viraltrendingmemes.com/");
-      await pingIndexNow(`https://viraltrendingmemes.com/?type=${meme.mediaType}`);
     }
 
     return NextResponse.json({

@@ -3,10 +3,10 @@ import Meme from "@/models/meme";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Metadata } from "next";
-import { cache } from "react"; // 👇 Ye import kiya for performance
+import { cache } from "react";
 import VideoPlayer from "@/app/components/VideoPlayer";
 import MemeActions from "@/app/components/MemeActions";
-import InterstitialAd from "@/app/components/InterstitialAd";
+import LazyInterstitialAd from "@/app/components/LazyInterstitialAd";
 import { CldImage } from "next-cloudinary";
 
 // 🚀 1. CACHED FETCH FUNCTION (Taaki DB 2 baar hit na ho)
@@ -127,8 +127,8 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       
-      {/* 🛑 THE AD POPUP */}
-      <InterstitialAd />
+      {/* Lazy-loaded ad popup */}
+      <LazyInterstitialAd />
 
       {/* 1. Minimal Navbar */}
       <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200 sticky top-0 z-40 transition-all">
@@ -162,7 +162,7 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
           <div className="rounded-4xl overflow-hidden bg-gray-50 flex items-center justify-center min-h-75 relative group">
             {meme.mediaType === "video" ? (
               <div className="w-full">
-                 <VideoPlayer src={meme.mediaUrl} poster={thumbnailUrl} />
+                 <VideoPlayer src={meme.mediaUrl} poster={thumbnailUrl} alt={meme.title} />
               </div>
             ) : (
               <CldImage 
@@ -179,20 +179,52 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
           </div>
         </div>
 
-        {/* 4. IMPROVED DETAILS SECTION (Description & Tags) */}
+        {/* 4. Details Section — Description, Metadata & Tags */}
         <div className="mt-8 max-w-2xl mx-auto bg-white p-8 rounded-4xl shadow-sm border border-gray-100">
           
-          {/* DESCRIPTION WALA PART */}
+          {/* Description */}
           <div className="mb-8">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-100 pb-2">
               Description
             </h3>
             <p className="text-gray-800 font-medium text-lg leading-relaxed">
-              {meme.description ? meme.description : "No description provided for this meme. Just enjoy the laughs! 😂"}
+              {meme.description ? meme.description : `This ${meme.category} meme is one of the funniest pieces of content on the internet right now. Whether you're looking for a quick laugh or want to share something hilarious with friends, this is the one.`}
             </p>
           </div>
 
-          {/* TAGS WALA PART (Ab Crash nahi hoga) */}
+          {/* Meme Info / Metadata — adds valuable original content for AdSense */}
+          <div className="mb-8 grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="bg-gray-50 p-4 rounded-2xl text-center">
+              <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Category</p>
+              <p className="font-bold text-gray-900">{meme.category}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-2xl text-center">
+              <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Type</p>
+              <p className="font-bold text-gray-900">{meme.mediaType === "video" ? "🎥 Video" : "📸 Image"}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-2xl text-center col-span-2 sm:col-span-1">
+              <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-1">Uploaded</p>
+              <p className="font-bold text-gray-900">
+                {meme.createdAt
+                  ? new Date(meme.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                  : "Recently"}
+              </p>
+            </div>
+          </div>
+
+          {/* How to use this meme — original text content for SEO & AdSense */}
+          <div className="mb-8">
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-100 pb-2">
+              How to Use This Meme
+            </h3>
+            <p className="text-gray-600 font-medium leading-relaxed">
+              Click the download button below to save this {meme.mediaType === "video" ? "video" : "image"} meme directly to your device. 
+              You can share it on WhatsApp, Instagram, Twitter, Discord, or any other platform. 
+              All memes on ViralTrendingMemes are free to download and share with friends and family.
+            </p>
+          </div>
+
+          {/* Tags */}
           {safeTags.length > 0 && (
             <div>
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-100 pb-2">

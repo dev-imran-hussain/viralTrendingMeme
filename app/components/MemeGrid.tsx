@@ -69,7 +69,7 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
               {/* Top Media Area */}
               <Link href={`/meme/${meme.slug}`} className="block overflow-hidden relative bg-gray-50 border-b-2 border-black">
                 {meme.mediaType === "video" ? (
-                  <VideoPlayer src={meme.mediaUrl} poster={posterUrl} />
+                  <VideoPlayer src={meme.mediaUrl} poster={posterUrl} alt={meme.title} />
                 ) : (
                   <CldImage
                     src={meme.mediaUrl}

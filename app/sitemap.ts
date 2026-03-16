@@ -2,67 +2,86 @@ import { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/db';
 import Meme from '@/models/meme';
 
+// Batch size for sitemap generation — prevents memory spikes on large datasets
+const SITEMAP_BATCH_SIZE = 2000;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // ⚠️ IMPORTANT: Replace with your actual Hostinger domain
   const baseUrl = 'https://viraltrendingmemes.com';
 
-  // Base routes
+  // Static routes
   const routes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 1.0, // Top priority for your homepage
+      priority: 1.0,
     },
     {
-      url: `${baseUrl}/?type=video`,
+      url: `${baseUrl}/about`,
       lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/?type=image`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/upload`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly', // Upload page doesn't change as often
+      changeFrequency: 'monthly',
       priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/dmca`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
     },
   ];
 
   try {
-    // Dynamically calculate priority based on routes
-    let mainRoutes: MetadataRoute.Sitemap = [];
-    
-    // Only add base routes to the first sitemap chunk (id = 0)
-    // To implement sitemap chunking propery, Next.js requires the setup of
-    // generateSitemaps function instead of doing pagination in the default exported function.
-    // For now, I will add an upper limit to prevent timeout, and you can implement standard 
-    // chunking when needed using NextJS 15+ specifications.
-    
     await connectDB();
-    // Limit to 10,000 most recent approved memes to prevent Vercel 504 timeouts on massive sites
-    const memes = await Meme.find({ isApproved: true })
+
+    // Fetch memes in batches using cursor to prevent memory spikes
+    let allMemeRoutes: MetadataRoute.Sitemap = [];
+    let skip = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const memes = await Meme.find({ isApproved: true })
         .sort({ createdAt: -1 })
-        .limit(10000)
+        .skip(skip)
+        .limit(SITEMAP_BATCH_SIZE)
         .select('slug updatedAt createdAt')
         .lean() as any[];
 
-    // Add meme routes dynamically
-    const memeRoutes: MetadataRoute.Sitemap = memes.map((meme) => ({
-      url: `${baseUrl}/meme/${meme.slug}`,
-      lastModified: meme.updatedAt || meme.createdAt || new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    }));
+      const memeRoutes: MetadataRoute.Sitemap = memes.map((meme) => ({
+        url: `${baseUrl}/meme/${meme.slug}`,
+        lastModified: meme.updatedAt || meme.createdAt || new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }));
 
-    return [...routes, ...memeRoutes];
+      allMemeRoutes = [...allMemeRoutes, ...memeRoutes];
+      skip += SITEMAP_BATCH_SIZE;
+      hasMore = memes.length === SITEMAP_BATCH_SIZE;
+
+      // Safety cap: 50,000 URLs (Google sitemap limit)
+      if (allMemeRoutes.length >= 50000) break;
+    }
+
+    return [...routes, ...allMemeRoutes];
   } catch (error) {
     console.error("Error generating sitemap for memes:", error);
     return routes; // graceful fallback
   }
-}
+}
