@@ -1,8 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import VideoPlayer from "./VideoPlayer";
 import { getMemes } from "@/app/actions/getMemes";
+import { CldImage } from "next-cloudinary";
+import { useInView } from "react-intersection-observer";
 
 interface MemeGridProps {
   initialMemes: any[];
@@ -15,6 +17,18 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialMemes.length >= 8); 
+
+  // Infinite Scroll Trigger Hook
+  const { ref, inView } = useInView({
+    threshold: 0,
+    rootMargin: "400px", // Trigger earlier before hitting the actual bottom
+  });
+
+  useEffect(() => {
+    if (inView && hasMore && !loading) {
+      loadMoreMemes();
+    }
+  }, [inView, hasMore, loading]);
 
   const loadMoreMemes = async () => {
     setLoading(true);
@@ -37,20 +51,17 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
     setLoading(false);
   };
 
-  // 🚀 MAGIC FUNCTION: Ye function Cloudinary URLs ko compress kar dega
-  const getOptimizedUrl = (url: string) => {
-    if (!url) return "";
-    // Sirf Cloudinary URLs ko compress karo (w_800 matlab 800px width, f_auto matlab WebP format)
-    if (url.includes("/upload/")) {
-      return url.replace("/upload/", "/upload/q_auto,f_auto,w_800/");
-    }
-    return url;
-  };
+  // Using next-cloudinary CldImage for automatic optimization
 
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {memes.map((meme: any) => (
+        {memes.map((meme: any) => {
+          const posterUrl = meme.mediaType === "video" 
+            ? meme.mediaUrl.replace(/\.[^/.]+$/, ".jpg") 
+            : undefined;
+
+          return (
           <div
             key={meme._id}
             className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-black group flex flex-col"
@@ -58,12 +69,16 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
             {/* Top Media Area */}
             <Link href={`/meme/${meme.slug}`} className="block overflow-hidden relative bg-gray-50 border-b-2 border-black">
               {meme.mediaType === "video" ? (
-                <VideoPlayer src={meme.mediaUrl} />
+                <VideoPlayer src={meme.mediaUrl} poster={posterUrl} />
               ) : (
-                <img
-                  src={getOptimizedUrl(meme.mediaUrl)} // 👈 OPTIMIZED URL YAHAN LAGAYA
+                <CldImage
+                  src={meme.mediaUrl} 
                   alt={meme.title}
-                  loading="lazy" // 👈 LAZY LOADING: Sirf tab load hoga jab user scroll karke neeche aayega
+                  width="800"
+                  height="800"
+                  crop="fill"
+                  format="auto"
+                  quality="auto"
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               )}
@@ -96,18 +111,19 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
               </Link>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Load More Button */}
+      {/* Load More Trigger Area */}
       {hasMore && (
-        <div className="flex justify-center mt-12 mb-4">
+        <div ref={ref} className="flex justify-center mt-12 mb-4">
           <button
             onClick={loadMoreMemes}
             disabled={loading}
             className="px-8 py-3 bg-black text-white border-2 border-black font-bold rounded-full hover:bg-gray-800 transition-colors disabled:opacity-50 shadow-md"
           >
-            {loading ? "Loading..." : "Load More Memes"}
+            {loading ? "Loading..." : "↓ Scroll to Load More"}
           </button>
         </div>
       )}

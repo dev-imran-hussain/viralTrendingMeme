@@ -53,11 +53,20 @@ export async function generateMetadata({
       type: "website",
       siteName: "ViralTrendingMemes",
       url: "https://viraltrendingmemes.com",
+      images: [
+        {
+          url: "https://viraltrendingmemes.com/og-image.jpg", // Create this default image later
+          width: 1200,
+          height: 630,
+          alt: "ViralTrendingMemes - The internet's best collection of funny videos and photos",
+        }
+      ]
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: ["https://viraltrendingmemes.com/og-image.jpg"],
     },
     alternates: {
       canonical: `https://viraltrendingmemes.com${q ? `/?q=${q}` : ""}${type !== "all" ? `/?type=${type}` : ""}`,

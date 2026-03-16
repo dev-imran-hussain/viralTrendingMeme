@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Meme from "@/models/meme";
 import cloudinary from "@/lib/cloudinary";
-import { pingIndexNow } from "@/lib/indexNow"; 
+import { pingIndexNow } from "@/lib/indexNow";
 // 👇 1. Naye Imports Security/Auth ke liye
 import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
@@ -11,11 +11,11 @@ import { cookies } from "next/headers";
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB limit for images
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB limit for videos
 const ALLOWED_MIME_TYPES = [
-  "image/jpeg", 
-  "image/png", 
-  "image/gif", 
-  "image/webp", 
-  "video/mp4", 
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "video/mp4",
   "video/webm"
 ];
 
@@ -24,11 +24,11 @@ export async function POST(request: Request) {
     // 🔒 2. THE ULTIMATE SECURITY CHECK (Admin Only API)
     const cookieStore = await cookies();
     const token = cookieStore.get("adminToken")?.value;
-    
+
     // Agar token nahi hai ya galat hai, seedha bahar nikal do
     if (!token || !verifyToken(token)) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized access! Only Admins can upload." }, 
+        { success: false, error: "Unauthorized access! Only Admins can upload." },
         { status: 401 }
       );
     }
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     const category = formData.get("category") as string;
     const tags = (formData.get("tags") as string) || "";
     const description = (formData.get("description") as string) || "";
-    
+
     // Accept either a raw file OR a direct Cloudinary URL from the client
     const file = formData.get("file") as File | null;
     const mediaUrl = formData.get("mediaUrl") as string | null;
@@ -49,14 +49,14 @@ export async function POST(request: Request) {
     // Basic Field Validation
     if (!title || !category || !description) {
       return NextResponse.json(
-        { success: false, error: "Title, Category, and Description are required!" }, 
+        { success: false, error: "Title, Category, and Description are required!" },
         { status: 400 }
       );
     }
 
     if (!file && !mediaUrl) {
       return NextResponse.json(
-        { success: false, error: "Either a File or a direct Media URL is required!" }, 
+        { success: false, error: "Either a File or a direct Media URL is required!" },
         { status: 400 }
       );
     }
@@ -68,19 +68,19 @@ export async function POST(request: Request) {
     if (file) {
       if (!ALLOWED_MIME_TYPES.includes(file.type)) {
         return NextResponse.json(
-          { success: false, error: "Invalid format! Only JPG, PNG, GIF, WEBP, MP4, and WEBM are allowed." }, 
+          { success: false, error: "Invalid format! Only JPG, PNG, GIF, WEBP, MP4, and WEBM are allowed." },
           { status: 400 }
         );
       }
 
-    // 🛡️ 3. SECURITY CHECK: File Size Validation (Fixed Error Message)
+      // 🛡️ 3. SECURITY CHECK: File Size Validation (Fixed Error Message)
       // 🛡️ SECURITY CHECK: File Size Validation
       const isVideo = file.type.startsWith("video/");
       const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
 
       if (file.size > maxSize) {
         return NextResponse.json(
-          { success: false, error: `File too large! Max size for ${isVideo ? 'video is 50MB' : 'image is 20MB'}.` }, 
+          { success: false, error: `File too large! Max size for ${isVideo ? 'video is 50MB' : 'image is 20MB'}.` },
           { status: 400 }
         );
       }
@@ -92,19 +92,19 @@ export async function POST(request: Request) {
       // ☁️ Optimized Cloudinary Upload
       const uploadResponse: any = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
-          { 
-            resource_type: "auto", 
+          {
+            resource_type: "auto",
             folder: "memes",
-            quality: "auto", 
-            fetch_format: "auto" 
+            quality: "auto",
+            fetch_format: "auto"
           },
-          (error, result) => { 
-            if (error) reject(error); 
-            else resolve(result); 
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
           }
         ).end(buffer);
       });
-      
+
       finalMediaUrl = uploadResponse.secure_url;
       finalMediaType = uploadResponse.resource_type === "video" ? "video" : "image";
     }
@@ -116,9 +116,9 @@ export async function POST(request: Request) {
       mediaUrl: finalMediaUrl,
       mediaType: finalMediaType,
       category,
-      tags: tags.split(",").map(t => t.trim()).filter(t => t !== ""), 
+      tags: tags.split(",").map(t => t.trim()).filter(t => t !== ""),
       description: description.trim(),
-      isApproved: false, // ⚠️ Goes to Review Queue
+      isApproved: true, // ⚠️ Goes to Review Queue
       uploaderRole: "admin" // 👈 Changed to admin
     });
 
@@ -128,15 +128,15 @@ export async function POST(request: Request) {
       await pingIndexNow(`https://viraltrendingmemes.com/?type=${meme.mediaType}`);
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Meme submitted successfully! Saved to Review Queue." 
+    return NextResponse.json({
+      success: true,
+      message: "Meme submitted successfully and published immediately!"
     }, { status: 201 });
 
   } catch (error: any) {
     console.error("Admin Upload Error:", error);
     return NextResponse.json(
-      { success: false, error: "Upload failed. Please try again later." }, 
+      { success: false, error: "Upload failed. Please try again later." },
       { status: 500 }
     );
   }

@@ -7,6 +7,7 @@ import { cache } from "react"; // 👇 Ye import kiya for performance
 import VideoPlayer from "@/app/components/VideoPlayer";
 import MemeActions from "@/app/components/MemeActions";
 import InterstitialAd from "@/app/components/InterstitialAd";
+import { CldImage } from "next-cloudinary";
 
 // 🚀 1. CACHED FETCH FUNCTION (Taaki DB 2 baar hit na ho)
 const getMeme = cache(async (slug: string) => {
@@ -21,17 +22,55 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   // 👇 Ab ye fast cached function use karega
   const meme = await getMeme(slug);
 
-  if (!meme) return { title: "Meme Not Found | MemeSite" };
+  if (!meme) return { title: "Meme Not Found | ViralTrendingMemes" };
 
-  return {
-    title: `${meme.title} - Free Download | MemeSite`,
-    description: meme.description || `Download this hilarious ${meme.category} meme!`,
+  const parsedTags = Array.isArray(meme.tags) 
+    ? meme.tags 
+    : typeof meme.tags === "string" 
+      ? meme.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
+      : [];
+
+  // Base metadata config
+  const metadata: Metadata = {
+    title: `${meme.title} - Free Download | ViralTrendingMemes`,
+    description: meme.description || `Download this hilarious ${meme.category} meme! We update daily with the internet's best funny videos and dank photos.`,
+    keywords: ["memes", meme.category, ...parsedTags],
+    alternates: {
+      canonical: `https://viraltrendingmemes.com/meme/${slug}`,
+    },
     openGraph: {
       title: meme.title,
       description: meme.description || `Download this hilarious ${meme.category} meme!`,
-      images: [meme.mediaUrl],
+      url: `https://viraltrendingmemes.com/meme/${slug}`,
+      siteName: "ViralTrendingMemes",
+      images: meme.mediaType === "image" ? [
+        {
+          url: meme.mediaUrl,
+          width: 800,
+          height: 800,
+          alt: meme.title
+        }
+      ] : [],
+      type: "video.other",
+    },
+    twitter: {
+      card: meme.mediaType === "video" ? "player" : "summary_large_image",
+      title: meme.title,
+      description: meme.description || `Download this hilarious ${meme.category} meme!`,
     },
   };
+
+  // If it's a video, append specific OpenGraph video properties
+  // This allows Discord/Twitter/iMessage to play the video natively!
+  if (meme.mediaType === "video" && metadata.openGraph) {
+    metadata.openGraph.videos = [
+      {
+        url: meme.mediaUrl,
+      }
+    ];
+  }
+
+  return metadata;
 }
 
 // 🚀 3. MAIN PAGE
@@ -56,13 +95,20 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
       .filter(Boolean);
   }
 
+  // Google Search Console Video Indexing Fix:
+  // thumbnailUrl MUST be an image, not an .mp4 or .webm file.
+  // We can automatically generate a poster image using Cloudinary by replacing the extension with .jpg
+  const thumbnailUrl = meme.mediaType === "video" 
+    ? meme.mediaUrl.replace(/\.[^/.]+$/, ".jpg") 
+    : meme.mediaUrl;
+
   // 🚀 SEO MAGIC 3: JSON-LD for Search Engines
   const jsonLd = meme.mediaType === "video" ? {
     "@context": "https://schema.org",
     "@type": "VideoObject",
     "name": meme.title,
     "description": meme.description || `Download this hilarious ${meme.category} meme!`,
-    "thumbnailUrl": [meme.mediaUrl],
+    "thumbnailUrl": [thumbnailUrl],
     "uploadDate": meme.createdAt || new Date().toISOString(),
     "contentUrl": meme.mediaUrl
   } : {
@@ -116,12 +162,17 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
           <div className="rounded-4xl overflow-hidden bg-gray-50 flex items-center justify-center min-h-75 relative group">
             {meme.mediaType === "video" ? (
               <div className="w-full">
-                 <VideoPlayer src={meme.mediaUrl} />
+                 <VideoPlayer src={meme.mediaUrl} poster={thumbnailUrl} />
               </div>
             ) : (
-              <img 
+              <CldImage 
                 src={meme.mediaUrl} 
                 alt={meme.title} 
+                width="1200"
+                height="1200"
+                crop="fit"
+                format="auto"
+                quality="auto"
                 className="w-full max-h-[65vh] object-contain"
               />
             )}

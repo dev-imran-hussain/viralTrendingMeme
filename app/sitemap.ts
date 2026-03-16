@@ -35,9 +35,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    // Fetch all approved memes
+    // Dynamically calculate priority based on routes
+    let mainRoutes: MetadataRoute.Sitemap = [];
+    
+    // Only add base routes to the first sitemap chunk (id = 0)
+    // To implement sitemap chunking propery, Next.js requires the setup of
+    // generateSitemaps function instead of doing pagination in the default exported function.
+    // For now, I will add an upper limit to prevent timeout, and you can implement standard 
+    // chunking when needed using NextJS 15+ specifications.
+    
     await connectDB();
-    const memes = await Meme.find({ isApproved: true }).select('slug updatedAt createdAt').lean() as any[];
+    // Limit to 10,000 most recent approved memes to prevent Vercel 504 timeouts on massive sites
+    const memes = await Meme.find({ isApproved: true })
+        .sort({ createdAt: -1 })
+        .limit(10000)
+        .select('slug updatedAt createdAt')
+        .lean() as any[];
 
     // Add meme routes dynamically
     const memeRoutes: MetadataRoute.Sitemap = memes.map((meme) => ({

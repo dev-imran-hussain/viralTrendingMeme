@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 
-export default function VideoPlayer({ src }: { src: string }) {
+export default function VideoPlayer({ src, poster }: { src: string; poster?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true); // True initially if autoPlay is on
 
@@ -37,6 +37,7 @@ export default function VideoPlayer({ src }: { src: string }) {
       <video
         ref={videoRef}
         src={src}
+        poster={poster}
         loop
         playsInline
         preload="metadata"
