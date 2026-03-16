@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Script from 'next/script'
 
 // 👇 1. Vercel ke tools import kiye
 import { Analytics } from "@vercel/analytics/react";
@@ -29,15 +30,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8865004522012498"
+          crossorigin="anonymous"></script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        
+
         {/* 👇 3. Analytics aur Speed Insights yahan add kar diye */}
         <Analytics />
         <SpeedInsights />
-        
+
       </body>
     </html>
   );

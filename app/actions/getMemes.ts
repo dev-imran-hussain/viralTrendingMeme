@@ -8,7 +8,7 @@ export async function getMemes(page = 1, limit = 10, type = "all", search = "") 
   await connectDB();
 
   const skip = (page - 1) * limit;
-  
+
   // 1. Base Query: Only show approved memes
   const query: any = { isApproved: true };
 

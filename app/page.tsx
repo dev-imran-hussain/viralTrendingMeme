@@ -231,31 +231,28 @@ export default async function Home({
         <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100 flex gap-1 z-0 relative">
           <Link
             href={`/?type=all${q ? `&q=${q}` : ""}`}
-            className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-              type === "all"
+            className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${type === "all"
                 ? "bg-black text-white shadow-md scale-100"
                 : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
-            }`}
+              }`}
           >
             🔥 All
           </Link>
           <Link
             href={`/?type=video${q ? `&q=${q}` : ""}`}
-            className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-              type === "video"
+            className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${type === "video"
                 ? "bg-black text-white shadow-md scale-100"
                 : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
-            }`}
+              }`}
           >
             🎥 Videos
           </Link>
           <Link
             href={`/?type=image${q ? `&q=${q}` : ""}`}
-            className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-              type === "image"
+            className={`px-6 sm:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${type === "image"
                 ? "bg-black text-white shadow-md scale-100"
                 : "text-gray-500 hover:text-black hover:bg-gray-50 active:scale-95"
-            }`}
+              }`}
           >
             📸 Photos
           </Link>
