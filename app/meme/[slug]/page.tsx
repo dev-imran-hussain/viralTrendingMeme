@@ -30,18 +30,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       ? meme.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
       : [];
 
+  // 🚀 THE FIX: Strict, clean Canonical URL (No trailing slash, consistent domain with www)
+  const canonicalUrl = `https://www.viraltrendingmemes.com/meme/${slug}`;
+
   // Base metadata config
   const metadata: Metadata = {
     title: `${meme.title} - Free Download | ViralTrendingMemes`,
     description: meme.description || `Download this hilarious ${meme.category} meme! We update daily with the internet's best funny videos and dank photos.`,
     keywords: ["memes", meme.category, ...parsedTags],
     alternates: {
-      canonical: `https://viraltrendingmemes.com/meme/${slug}`,
+      canonical: canonicalUrl, // 👈 Fix applied here
     },
     openGraph: {
       title: meme.title,
       description: meme.description || `Download this hilarious ${meme.category} meme!`,
-      url: `https://viraltrendingmemes.com/meme/${slug}`,
+      url: canonicalUrl, // 👈 Fix applied here
       siteName: "ViralTrendingMemes",
       images: meme.mediaType === "image" ? [
         {
