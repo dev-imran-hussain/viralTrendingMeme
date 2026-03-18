@@ -68,13 +68,8 @@ export async function generateMetadata({
       images: ["https://viraltrendingmemes.com/og-image.jpg"],
     },
     alternates: {
-      canonical: (() => {
-        const params = new URLSearchParams();
-        if (q) params.set("q", q);
-        if (type !== "all") params.set("type", type);
-        const qs = params.toString();
-        return `https://viraltrendingmemes.com${qs ? `/?${qs}` : ""}`;
-      })(),
+      // 🚀 THE FIX: Fixes Soft 404 by forcing Google to only index the main URL
+      canonical: "https://viraltrendingmemes.com/",
     },
   };
 }
