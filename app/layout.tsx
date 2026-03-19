@@ -27,7 +27,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "ViralTrendingMeme - Unlimited Laughs & Daily Memes",
-  description: "The internet's best collection of funny videos, dank photos, dark humor, and viral trends. Updated every single day.",
+  description:
+    "The internet's best collection of funny videos, dank photos, dark humor, and viral trends. Updated every single day.",
 };
 
 export default function RootLayout({
@@ -39,14 +40,30 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Google Analytics */}
-        <Script 
-          src="https://www.googletagmanager.com/gtag/js?id=G-363FYJD978" 
-          strategy="afterInteractive" 
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-363FYJD978"
+          strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){window.dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-363FYJD978');
+          `}
+        </Script>
+
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){window.dataLayer.push(arguments);}
+            
+            // Default Consent state: Deny everything until user clicks Accept
+            gtag('consent', 'default', {
+              'analytics_storage': 'denied',
+              'ad_storage': 'denied'
+            });
+
             gtag('js', new Date());
             gtag('config', 'G-363FYJD978');
           `}

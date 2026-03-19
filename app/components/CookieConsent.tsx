@@ -6,10 +6,19 @@ export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    // Check if user has already accepted cookies
     const consent = localStorage.getItem("vtm_cookie_consent");
-    if (!consent) {
-      // Show banner after a short delay so it doesn't block initial paint
+    
+    // If they already accepted in a previous session, tell Google to start tracking
+    if (consent === "accepted") {
+      if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+        (window as any).gtag("consent", "update", {
+          analytics_storage: "granted",
+          ad_storage: "granted",
+        });
+      }
+    } 
+    // If no consent is found, show the banner
+    else if (!consent) {
       const timer = setTimeout(() => setShowBanner(true), 1500);
       return () => clearTimeout(timer);
     }
@@ -18,11 +27,27 @@ export default function CookieConsent() {
   const acceptCookies = () => {
     localStorage.setItem("vtm_cookie_consent", "accepted");
     setShowBanner(false);
+    
+    // Tell Google the user opted IN
+    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+      (window as any).gtag("consent", "update", {
+        analytics_storage: "granted",
+        ad_storage: "granted",
+      });
+    }
   };
 
   const declineCookies = () => {
     localStorage.setItem("vtm_cookie_consent", "declined");
     setShowBanner(false);
+    
+    // Tell Google the user opted OUT
+    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+      (window as any).gtag("consent", "update", {
+        analytics_storage: "denied",
+        ad_storage: "denied",
+      });
+    }
   };
 
   if (!showBanner) return null;
