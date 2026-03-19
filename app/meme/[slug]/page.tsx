@@ -8,6 +8,7 @@ import VideoPlayer from "@/app/components/VideoPlayer";
 import MemeActions from "@/app/components/MemeActions";
 import LazyInterstitialAd from "@/app/components/LazyInterstitialAd";
 import { CldImage } from "next-cloudinary";
+import ShareButton from "@/app/components/ShareButton";
 
 // 🚀 1. CACHED FETCH FUNCTION (Taaki DB 2 baar hit na ho)
 const getMeme = cache(async (slug: string) => {
@@ -86,6 +87,9 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
   if (!meme) {
     notFound();
   }
+
+  // Define the full URL to pass to the Share Button
+  const fullMemeUrl = `https://www.viraltrendingmemes.com/meme/${slug}`;
 
   // 🛡️ Safe Tags Parsing Logic (Crash bachaane ke liye)
   let safeTags: string[] = [];
@@ -248,8 +252,11 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
           )}
         </div>
 
-        {/* 5. The Download Action */}
-        <MemeActions title={meme.title} mediaUrl={meme.mediaUrl} />
+    {/* 5. The Download & Share Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 fade-in duration-500 delay-300">
+          <MemeActions title={meme.title} mediaUrl={meme.mediaUrl} />
+          <ShareButton title={meme.title} url={fullMemeUrl} />
+        </div>
 
       </main>
     </div>
