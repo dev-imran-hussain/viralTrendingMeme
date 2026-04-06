@@ -45,7 +45,7 @@ export default function ComingSoonLink({ children }: { children: React.ReactNode
                 Coming <span className="text-purple-600">Soon!</span>
               </h3>
               <p className="text-gray-500 font-medium leading-relaxed mb-6">
-                Ye feature abhi ban raha hai. Bahut jald yahan naye memes aur categories milenge!
+                This feature is currently under construction. Awesome new memes and categories are dropping here very soon!
               </p>
               
               {/* Action Button */}
