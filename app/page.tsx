@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getMemes } from "@/app/actions/getMemes";
 import MemeGrid from "@/app/components/MemeGrid";
 import { Metadata } from "next";
+import ComingSoonLink from "@/app/components/ComingSoonLink";
 
 // 🚀 SEO MAGIC 1: Dynamic Metadata Generation
 export async function generateMetadata({
@@ -165,12 +166,11 @@ export default async function Home({
           </Link>
 
           <nav className="hidden md:flex gap-8 font-bold text-gray-500">
-            <Link href="/" className="hover:text-black transition-colors">
-              Trending
-            </Link>
-            <Link href="/" className="hover:text-black transition-colors">
-              Categories
-            </Link>
+
+            {/* 👇 Yahan Naya Component Use Kiya Hai 👇 */}
+            <ComingSoonLink>Trending</ComingSoonLink>
+            <ComingSoonLink>Categories</ComingSoonLink>
+
             <Link href="/about" className="hover:text-black transition-colors">About</Link>
           </nav>
         </div>
