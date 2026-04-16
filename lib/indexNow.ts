@@ -1,10 +1,10 @@
 // lib/indexNow.ts
 
 export async function pingIndexNow(urlToPing: string) {
-  const host = "viraltrendingmemes.com";
+  const host = "www.viraltrendingmemes.com";
 
   // Read IndexNow key from environment variable instead of hardcoding
-  const key = process.env.INDEXNOW_KEY;
+  const key = process.env.INDEXNOW_KEY || "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6";
 
   if (!key) {
     console.warn("⚠️ INDEXNOW_KEY not set in environment variables. Skipping IndexNow ping.");

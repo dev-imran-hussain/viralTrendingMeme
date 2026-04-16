@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     // 📝 Save to Database (Pending State)
     const meme = await Meme.create({
       title: title.trim(),
-      slug: title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now(),
+      slug: title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + "-" + Math.random().toString(36).substring(2, 6),
       mediaUrl: finalMediaUrl,
       mediaType: finalMediaType,
       category,
@@ -124,8 +124,8 @@ export async function POST(request: Request) {
 
     // 🚀 INDEX NOW PING — notify search engines about the new meme page
     if (meme.isApproved) {
-      await pingIndexNow(`https://viraltrendingmemes.com/meme/${meme.slug}`);
-      await pingIndexNow("https://viraltrendingmemes.com/");
+      await pingIndexNow(`https://www.viraltrendingmemes.com/meme/${meme.slug}`);
+      await pingIndexNow("https://www.viraltrendingmemes.com/");
     }
 
     return NextResponse.json({
