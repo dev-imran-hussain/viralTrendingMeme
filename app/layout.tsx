@@ -29,6 +29,18 @@ export const metadata: Metadata = {
   title: "ViralTrendingMeme - Unlimited Laughs & Daily Memes",
   description:
     "The internet's best collection of funny videos, dank photos, dark humor, and viral trends. Updated every single day.",
+  openGraph: {
+    locale: "en_US",
+  },
+  alternates: {
+    languages: {
+      "en-US": "/",
+      "hi-IN": "/", 
+    },
+    types: {
+      "application/rss+xml": "https://www.viraltrendingmemes.com/feed.xml",
+    },
+  },
 };
 
 export default function RootLayout({
@@ -48,16 +60,7 @@ export default function RootLayout({
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){window.dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-363FYJD978');
-          `}
-        </Script>
 
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){window.dataLayer.push(arguments);}
-            
             // Default Consent state: Deny everything until user clicks Accept
             gtag('consent', 'default', {
               'analytics_storage': 'denied',
@@ -68,6 +71,23 @@ export default function RootLayout({
             gtag('config', 'G-363FYJD978');
           `}
         </Script>
+
+        {/* Organization Schema for Google Knowledge Panel */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "ViralTrendingMemes",
+              url: "https://www.viraltrendingmemes.com",
+              logo: "https://www.viraltrendingmemes.com/og-image.jpg",
+              sameAs: [],
+              description:
+                "The internet's best collection of funny videos, dank photos, dark humor, and viral trends. Updated every single day.",
+            }),
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

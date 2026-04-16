@@ -4,16 +4,18 @@ import { getMemes } from "@/app/actions/getMemes";
 import MemeGrid from "@/app/components/MemeGrid";
 import { Metadata } from "next";
 import ComingSoonLink from "@/app/components/ComingSoonLink";
+import MobileNav from "@/app/components/MobileNav";
 
 // 🚀 SEO MAGIC 1: Dynamic Metadata Generation
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; q?: string }>;
+  searchParams: Promise<{ type?: string; q?: string; page?: string }>;
 }): Promise<Metadata> {
   const params = await searchParams;
   const type = params?.type || "all";
   const q = params?.q || "";
+  const pageParam = params?.page || "1";
 
   // Base SEO Default
   let title = "Viral Trending Memes - Unlimited Laughs & Daily Memes";
@@ -52,10 +54,10 @@ export async function generateMetadata({
       description,
       type: "website",
       siteName: "ViralTrendingMemes",
-      url: "https://viraltrendingmemes.com",
+      url: "https://www.viraltrendingmemes.com",
       images: [
         {
-          url: "https://viraltrendingmemes.com/og-image.jpg", // Create this default image later
+          url: "https://www.viraltrendingmemes.com/og-image.jpg",
           width: 1200,
           height: 630,
           alt: "ViralTrendingMemes - The internet's best collection of funny videos and photos",
@@ -66,11 +68,13 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["https://viraltrendingmemes.com/og-image.jpg"],
+      images: ["https://www.viraltrendingmemes.com/og-image.jpg"],
     },
     alternates: {
       // 🚀 THE FIX: Fixes Soft 404 by forcing Google to only index the main URL
-      canonical: "https://viraltrendingmemes.com/",
+      canonical: Number(pageParam) > 1 
+        ? `https://www.viraltrendingmemes.com/?page=${pageParam}` 
+        : "https://www.viraltrendingmemes.com/",
     },
   };
 }
@@ -96,8 +100,8 @@ function GridSkeleton() {
 }
 
 // 🚀 DATA FETCHING COMPONENT
-async function MemeFeed({ type, q }: { type: string; q: string }) {
-  const memes = await getMemes(1, 8, type, q);
+async function MemeFeed({ type, q, page }: { type: string; q: string; page: number }) {
+  const memes = await getMemes(page, 8, type, q);
 
   if (memes.length === 0) {
     return (
@@ -112,12 +116,27 @@ async function MemeFeed({ type, q }: { type: string; q: string }) {
   }
 
   return (
-    <MemeGrid
-      key={`${type}-${q}`}
-      initialMemes={memes}
-      type={type}
-      searchQuery={q}
-    />
+    <>
+      <MemeGrid
+        key={`${type}-${q}-${page}`}
+        initialMemes={memes}
+        type={type}
+        searchQuery={q}
+      />
+      {/* 🚀 SEO FIX: Hidden crawlable pagination links for Googlebot */ }
+      <div className="sr-only">
+        {page > 1 && (
+          <Link href={`/?page=${page - 1}${type !== 'all' ? `&type=${type}` : ''}${q ? `&q=${q}` : ''}`}>
+            Previous Page
+          </Link>
+        )}
+        {memes.length === 8 && (
+          <Link href={`/?page=${page + 1}${type !== 'all' ? `&type=${type}` : ''}${q ? `&q=${q}` : ''}`}>
+            Next Page
+          </Link>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -125,23 +144,24 @@ async function MemeFeed({ type, q }: { type: string; q: string }) {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; q?: string }>;
+  searchParams: Promise<{ type?: string; q?: string; page?: string }>;
 }) {
   // connectDB() is already called inside getMemes() — no need to call it here
 
   const params = await searchParams;
   const type = params?.type || "all";
   const q = params?.q || "";
+  const page = Number(params?.page) || 1;
 
   // 🚀 SEO MAGIC 2: JSON-LD Structured Data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "ViralTrendingMemes",
-    url: "https://viraltrendingmemes.com",
+    url: "https://www.viraltrendingmemes.com",
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://viraltrendingmemes.com/?q={search_term_string}",
+      target: "https://www.viraltrendingmemes.com/?q={search_term_string}",
       "query-input": "required name=search_term_string",
     },
   };
@@ -173,6 +193,9 @@ export default async function Home({
 
             <Link href="/about" className="hover:text-black transition-colors">About</Link>
           </nav>
+
+          {/* Mobile hamburger menu */}
+          <MobileNav />
         </div>
       </header>
 
@@ -188,7 +211,7 @@ export default async function Home({
           </span>
         </h1>
         <h2 className="text-lg text-gray-500 font-medium max-w-2xl mb-10">
-          The internet's best collection of funny videos, dark humor, and viral
+          The internet&apos;s best collection of funny videos, dark humor, and viral
           trends. Updated every single day.
         </h2>
 
@@ -275,8 +298,8 @@ export default async function Home({
 
       {/* 6. Main Content Area with Suspense */}
       <main className="max-w-7xl mx-auto px-6 min-h-[50vh]">
-        <Suspense key={`${type}-${q}`} fallback={<GridSkeleton />}>
-          <MemeFeed type={type} q={q} />
+        <Suspense key={`${type}-${q}-${page}`} fallback={<GridSkeleton />}>
+          <MemeFeed type={type} q={q} page={page} />
         </Suspense>
       </main>
 

@@ -1,0 +1,37 @@
+# ViralTrendingMemes
+
+> The internet's best collection of funny videos, dank photos, dark humor, and viral trends. Updated every single day.
+
+## About
+
+ViralTrendingMemes is a free meme platform featuring thousands of curated funny videos and image memes. We update our collection daily with the latest viral content, reaction templates, and trending humor from across the internet.
+
+## Content Types
+
+- **Video Memes**: Short-form viral video clips, reaction videos, green screen templates
+- **Image Memes**: Dank photos, relatable pictures, dark humor images, meme templates
+
+## Key Pages
+
+- Homepage: https://www.viraltrendingmemes.com
+- About: https://www.viraltrendingmemes.com/about
+- Contact: https://www.viraltrendingmemes.com/contact
+- Privacy Policy: https://www.viraltrendingmemes.com/privacy
+- Terms of Service: https://www.viraltrendingmemes.com/terms
+- DMCA Policy: https://www.viraltrendingmemes.com/dmca
+
+## Content Policy
+
+All memes on ViralTrendingMemes are free to download and share. We respect intellectual property rights and have a DMCA takedown process for copyright holders.
+
+## How to Cite
+
+When referencing content from ViralTrendingMemes, please link to the specific meme page URL (e.g., https://www.viraltrendingmemes.com/meme/[meme-slug]).
+
+## Categories
+
+Funny Videos, Dank Memes, Dark Humor, Reaction Memes, Green Screen Templates, Bollywood Memes, Viral Trends, Relatable Content
+
+## Contact
+
+For inquiries, visit: https://www.viraltrendingmemes.com/contact

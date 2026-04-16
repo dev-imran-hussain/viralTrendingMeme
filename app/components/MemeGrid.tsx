@@ -87,9 +87,9 @@ export default function MemeGrid({ initialMemes, type, searchQuery = "" }: MemeG
               {/* Bottom Info & Download Area */}
               <div className="p-4 flex items-center justify-between gap-3 bg-white">
                 <Link href={`/meme/${meme.slug}`} className="flex-1 min-w-0">
-                  <p className="font-bold text-lg text-gray-800 truncate hover:text-purple-600 transition-colors">
+                  <h3 className="font-bold text-lg text-gray-800 truncate hover:text-purple-600 transition-colors">
                     {meme.title}
-                  </p>
+                  </h3>
                 </Link>
 
                 <Link

@@ -2,11 +2,13 @@ import { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/db';
 import Meme from '@/models/meme';
 
+export const dynamic = 'force-dynamic';
+
 // Batch size for sitemap generation — prevents memory spikes on large datasets
 const SITEMAP_BATCH_SIZE = 2000;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://viraltrendingmemes.com';
+  const baseUrl = 'https://www.viraltrendingmemes.com';
 
   // Static routes
   const routes: MetadataRoute.Sitemap = [

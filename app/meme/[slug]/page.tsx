@@ -31,6 +31,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       ? meme.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
       : [];
 
+  // Compute thumbnail for video memes (Cloudinary auto-generates .jpg poster)
+  const metaThumbnail = meme.mediaType === "video"
+    ? meme.mediaUrl.replace(/\.[^/.]+$/, ".jpg")
+    : meme.mediaUrl;
+
   // 🚀 THE FIX: Strict, clean Canonical URL (No trailing slash, consistent domain with www)
   const canonicalUrl = `https://www.viraltrendingmemes.com/meme/${slug}`;
 
@@ -47,20 +52,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: meme.description || `Download this hilarious ${meme.category} meme!`,
       url: canonicalUrl, // 👈 Fix applied here
       siteName: "ViralTrendingMemes",
-      images: meme.mediaType === "image" ? [
+      images: [
         {
-          url: meme.mediaUrl,
+          url: metaThumbnail,
           width: 800,
           height: 800,
           alt: meme.title
         }
-      ] : [],
-      type: "video.other",
+      ],
+      type: meme.mediaType === "video" ? "video.other" : "article",
     },
     twitter: {
       card: meme.mediaType === "video" ? "player" : "summary_large_image",
       title: meme.title,
       description: meme.description || `Download this hilarious ${meme.category} meme!`,
+      images: [metaThumbnail],
     },
   };
 
@@ -127,11 +133,57 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
     "datePublished": meme.createdAt || new Date().toISOString()
   };
 
+  // 🚀 SEO: BreadcrumbList structured data for rich snippets
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.viraltrendingmemes.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": meme.category,
+        "item": `https://www.viraltrendingmemes.com/?q=${encodeURIComponent(meme.category)}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": meme.title,
+        "item": fullMemeUrl
+      }
+    ]
+  };
+
+  // 🚀 SEO: Fetch related memes for internal linking
+  let relatedMemes: any[] = [];
+  try {
+    relatedMemes = await Meme.find({
+      isApproved: true,
+      category: meme.category,
+      _id: { $ne: meme._id },
+    })
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .select("title slug mediaUrl mediaType")
+      .lean() as any[];
+  } catch (e) {
+    // Graceful fallback — related memes aren't critical
+  }
+
   return (
     <div className="min-h-screen bg-[#F4F4F5] pb-20 relative selection:bg-purple-300">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       
       {/* Lazy-loaded ad popup */}
@@ -152,6 +204,15 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
       {/* 2. Main Focused Content */}
       <main className="max-w-3xl mx-auto px-4 mt-10 animate-in fade-in zoom-in-95 duration-500">
         
+        {/* Breadcrumb Navigation — SEO + UX */}
+        <nav className="flex items-center gap-2 text-sm font-medium text-gray-400 mb-6 px-2 overflow-x-auto" aria-label="Breadcrumb">
+          <Link href="/" className="hover:text-purple-600 transition-colors whitespace-nowrap">Home</Link>
+          <span className="text-gray-300">›</span>
+          <Link href={`/?q=${encodeURIComponent(meme.category)}`} className="hover:text-purple-600 transition-colors whitespace-nowrap">{meme.category}</Link>
+          <span className="text-gray-300">›</span>
+          <span className="text-gray-600 font-bold truncate">{meme.title}</span>
+        </nav>
+
         {/* Category Badge */}
         <div className="flex justify-center mb-6">
           <Link href={`/?type=all&q=${meme.category}`} className="bg-purple-100 text-purple-700 hover:bg-purple-200 hover:text-purple-800 px-5 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em] border border-purple-200 transition-colors cursor-pointer">
@@ -257,6 +318,46 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
           <MemeActions title={meme.title} mediaUrl={meme.mediaUrl} />
           <ShareButton title={meme.title} url={fullMemeUrl} />
         </div>
+
+        {/* 6. Related Memes — Internal Linking for SEO */}
+        {relatedMemes.length > 0 && (
+          <div className="mt-12 max-w-2xl mx-auto">
+            <h2 className="text-xl font-black text-gray-900 mb-6">More {meme.category} Memes</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {relatedMemes.map((related: any) => {
+                const relPoster = related.mediaType === "video"
+                  ? related.mediaUrl.replace(/\.[^/.]+$/, ".jpg")
+                  : undefined;
+                return (
+                  <Link
+                    key={String(related._id)}
+                    href={`/meme/${related.slug}`}
+                    className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all"
+                  >
+                    {related.mediaType === "video" ? (
+                      <img
+                        src={relPoster}
+                        alt={`${related.title} - funny ${meme.category} meme`}
+                        className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <img
+                        src={related.mediaUrl}
+                        alt={`${related.title} - funny ${meme.category} meme`}
+                        className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    )}
+                    <h3 className="p-3 font-bold text-sm text-gray-800 truncate group-hover:text-purple-600 transition-colors">
+                      {related.title}
+                    </h3>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
       </main>
     </div>
