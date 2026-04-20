@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import Meme from "@/models/meme";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Metadata } from "next";
 import { cache } from "react";
 import VideoPlayer from "@/app/components/VideoPlayer";
@@ -116,6 +117,11 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
     : meme.mediaUrl;
 
   // 🚀 SEO MAGIC 3: JSON-LD for Search Engines
+  // Build ISO 8601 duration string from seconds (e.g. 30 -> "PT30S", 90 -> "PT1M30S")
+  const isoDuration = meme.duration
+    ? `PT${Math.floor(meme.duration / 60) > 0 ? Math.floor(meme.duration / 60) + "M" : ""}${meme.duration % 60}S`
+    : undefined;
+
   const jsonLd = meme.mediaType === "video" ? {
     "@context": "https://schema.org",
     "@type": "VideoObject",
@@ -123,7 +129,9 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
     "description": meme.description || `Download this hilarious ${meme.category} meme!`,
     "thumbnailUrl": [thumbnailUrl],
     "uploadDate": meme.createdAt || new Date().toISOString(),
-    "contentUrl": meme.mediaUrl
+    "contentUrl": meme.mediaUrl,
+    ...(isoDuration && { "duration": isoDuration }),
+    "embedUrl": fullMemeUrl
   } : {
     "@context": "https://schema.org",
     "@type": "ImageObject",
@@ -280,15 +288,29 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
             </div>
           </div>
 
-          {/* How to use this meme — original text content for SEO & AdSense */}
+          {/* How to use this meme — dynamic text content for SEO & AdSense */}
           <div className="mb-8">
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-100 pb-2">
               How to Use This Meme
             </h3>
             <p className="text-gray-600 font-medium leading-relaxed">
-              Click the download button below to save this {meme.mediaType === "video" ? "video" : "image"} meme directly to your device. 
-              You can share it on WhatsApp, Instagram, Twitter, Discord, or any other platform. 
-              All memes on ViralTrendingMemes are free to download and share with friends and family.
+              {meme.mediaType === "video" ? (
+                <>
+                  Hit the download button to save this {meme.category.toLowerCase()} video meme to your device.
+                  It works great as a reaction clip on WhatsApp, Instagram Reels, or Discord.
+                  {meme.duration && meme.duration < 15
+                    ? " This short clip is perfect for quick reactions and status updates."
+                    : " Share it with friends to give them an instant laugh."}
+                  All video memes on ViralTrendingMemes are completely free to download — no watermarks, no sign-up.
+                </>
+              ) : (
+                <>
+                  Tap the download button to save this {meme.category.toLowerCase()} image meme.
+                  Perfect for sharing on WhatsApp, Instagram stories, Twitter threads, or as a Discord reaction.
+                  You can also use it as a meme template — add your own captions in any photo editor.
+                  Every image meme on ViralTrendingMemes is free to download and share with no restrictions.
+                </>
+              )}
             </p>
           </div>
 
@@ -334,21 +356,15 @@ export default async function SingleMemePage({ params }: { params: Promise<{ slu
                     href={`/meme/${related.slug}`}
                     className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all"
                   >
-                    {related.mediaType === "video" ? (
-                      <img
-                        src={relPoster}
-                        alt={`${related.title} - funny ${meme.category} meme`}
-                        className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <img
-                        src={related.mediaUrl}
-                        alt={`${related.title} - funny ${meme.category} meme`}
-                        className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    )}
+                    <Image
+                      src={related.mediaType === "video" ? relPoster! : related.mediaUrl}
+                      alt={`${related.title} - funny ${meme.category} meme`}
+                      width={400}
+                      height={300}
+                      className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                    />
                     <h3 className="p-3 font-bold text-sm text-gray-800 truncate group-hover:text-purple-600 transition-colors">
                       {related.title}
                     </h3>

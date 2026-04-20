@@ -11,14 +11,27 @@ ViralTrendingMemes is a free meme platform featuring thousands of curated funny 
 - **Video Memes**: Short-form viral video clips, reaction videos, green screen templates
 - **Image Memes**: Dank photos, relatable pictures, dark humor images, meme templates
 
+## Popular Meme Examples
+
+- Jethalal Meme Template: https://www.viraltrendingmemes.com/meme/jethalal-oh-bapre-bhaag-ja-meme-template-taarak-mehta-funny-escape-reaction-tncj
+- GTA Wasted Green Screen: https://www.viraltrendingmemes.com/meme/gta-wasted-green-screen-meme-template-grand-theft-auto-fail-1775546426135
+- Confused John Travolta: https://www.viraltrendingmemes.com/meme/confused-john-travolta-meme-template-pulp-fiction-vincent-vega-green-screen-1775529034380
+- Walter White Chemistry Lab: https://www.viraltrendingmemes.com/meme/walter-white-chemistry-lab-meme-template-breaking-bad-1776019958995
+- Cristiano Ronaldo SIUUU: https://www.viraltrendingmemes.com/meme/cristiano-ronaldo-siiiiii-celebration-meme-template-1776019984317
+- Spanish Laughing Guy: https://www.viraltrendingmemes.com/meme/spanish-laughing-guy-el-risitas-green-screen-meme-template-l0yo
+- Phir Hera Pheri Radio Call: https://www.viraltrendingmemes.com/meme/phir-hera-pheri-hello-anyone-hear-my-voice-funny-radio-call-meme-template-52pc
+
 ## Key Pages
 
 - Homepage: https://www.viraltrendingmemes.com
+- Video Memes: https://www.viraltrendingmemes.com/?type=video
+- Image Memes: https://www.viraltrendingmemes.com/?type=image
 - About: https://www.viraltrendingmemes.com/about
 - Contact: https://www.viraltrendingmemes.com/contact
 - Privacy Policy: https://www.viraltrendingmemes.com/privacy
 - Terms of Service: https://www.viraltrendingmemes.com/terms
 - DMCA Policy: https://www.viraltrendingmemes.com/dmca
+- RSS Feed: https://www.viraltrendingmemes.com/feed.xml
 
 ## Content Policy
 
@@ -35,3 +48,4 @@ Funny Videos, Dank Memes, Dark Humor, Reaction Memes, Green Screen Templates, Bo
 ## Contact
 
 For inquiries, visit: https://www.viraltrendingmemes.com/contact
+

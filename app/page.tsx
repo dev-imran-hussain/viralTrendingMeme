@@ -38,9 +38,19 @@ export async function generateMetadata({
       "Browse our massive gallery of relatable pictures, dank photos, and hilarious image memes.";
   }
 
+  // SEO: Noindex search result pages to prevent index bloat
+  const robotsDirective = q ? { index: false, follow: true } : undefined;
+
+  // SEO: Canonical URL — search pages get noindexed, filter pages canonicalize to main URL
+  let canonicalUrl = "https://www.viraltrendingmemes.com/";
+  if (Number(pageParam) > 1) {
+    canonicalUrl = `https://www.viraltrendingmemes.com/?page=${pageParam}`;
+  }
+
   return {
     title,
     description,
+    ...(robotsDirective && { robots: robotsDirective }),
     keywords: [
       "memes",
       "funny videos",
@@ -71,10 +81,7 @@ export async function generateMetadata({
       images: ["https://www.viraltrendingmemes.com/og-image.jpg"],
     },
     alternates: {
-      // 🚀 THE FIX: Fixes Soft 404 by forcing Google to only index the main URL
-      canonical: Number(pageParam) > 1 
-        ? `https://www.viraltrendingmemes.com/?page=${pageParam}` 
-        : "https://www.viraltrendingmemes.com/",
+      canonical: canonicalUrl,
     },
   };
 }
@@ -298,6 +305,13 @@ export default async function Home({
 
       {/* 6. Main Content Area with Suspense */}
       <main className="max-w-7xl mx-auto px-6 min-h-[50vh]">
+        {/* SEO: Introductory editorial content to avoid thin-content classification */}
+        {!q && page === 1 && (
+          <p className="text-center text-gray-500 font-medium text-sm max-w-3xl mx-auto mb-8 leading-relaxed">
+            Welcome to ViralTrendingMemes — your daily source for the internet&apos;s funniest meme templates, reaction videos, and dank image macros.
+            Browse hundreds of trending {type === "video" ? "video clips" : type === "image" ? "funny pictures" : "memes"} curated fresh every day, ready to download and share for free.
+          </p>
+        )}
         <Suspense key={`${type}-${q}-${page}`} fallback={<GridSkeleton />}>
           <MemeFeed type={type} q={q} page={page} />
         </Suspense>

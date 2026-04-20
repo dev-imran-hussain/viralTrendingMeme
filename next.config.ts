@@ -14,6 +14,23 @@ const nextConfig: NextConfig = {
   // Enable gzip/brotli compression for all responses
   compress: true,
 
+  // Enforce www domain to prevent duplicate content indexing
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'viraltrendingmemes.com',
+          },
+        ],
+        destination: 'https://www.viraltrendingmemes.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
+
   // Security & performance headers
   async headers() {
     return [

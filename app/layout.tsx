@@ -35,7 +35,6 @@ export const metadata: Metadata = {
   alternates: {
     languages: {
       "en-US": "/",
-      "hi-IN": "/", 
     },
     types: {
       "application/rss+xml": "https://www.viraltrendingmemes.com/feed.xml",
@@ -82,7 +81,12 @@ export default function RootLayout({
               name: "ViralTrendingMemes",
               url: "https://www.viraltrendingmemes.com",
               logo: "https://www.viraltrendingmemes.com/og-image.jpg",
-              sameAs: [],
+              // TODO: Add your real social media profile URLs here
+              sameAs: [
+                // "https://www.instagram.com/viraltrendingmemes",
+                // "https://twitter.com/viraltrendingmemes",
+                // "https://www.youtube.com/@viraltrendingmemes",
+              ],
               description:
                 "The internet's best collection of funny videos, dank photos, dark humor, and viral trends. Updated every single day.",
             }),
