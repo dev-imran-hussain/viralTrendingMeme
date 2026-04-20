@@ -1,16 +1,21 @@
-const https = require('https');
-
 const SITEMAP_URL = 'https://www.viraltrendingmemes.com/sitemap.xml';
-const PING_URL = `https://www.google.com/ping?sitemap=${encodeURIComponent(SITEMAP_URL)}`;
+const GOOGLE_PING_URL = `https://www.google.com/ping?sitemap=${SITEMAP_URL}`;
 
-console.log(`Pinging Google with sitemap: ${SITEMAP_URL}`);
+async function pingGoogle() {
+  try {
+    console.log(`🚀 Pinging Google with sitemap: ${SITEMAP_URL}...`);
 
-https.get(PING_URL, (res) => {
-  if (res.statusCode === 200) {
-    console.log('✅ Successfully pinged Google Search Console!');
-  } else {
-    console.error(`❌ Failed to ping Google. Status Code: ${res.statusCode}`);
+    // Google ke server ko GET request bhej rahe hain
+    const response = await fetch(GOOGLE_PING_URL);
+
+    if (response.ok) {
+      console.log('✅ Success! Google has been notified. Tera sitemap queue mein lag gaya hai.');
+    } else {
+      console.error('❌ Failed to ping Google:', response.status, response.statusText);
+    }
+  } catch (error) {
+    console.error('❌ Error pinging Google:', error.message);
   }
-}).on('error', (e) => {
-  console.error(`❌ Error pinging Google: ${e.message}`);
-});
+}
+
+pingGoogle();
